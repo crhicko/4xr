@@ -1,7 +1,7 @@
 extends Node
 
-export var MAX_ROWS = 10
-export var MAX_COLS = 10
+export var MAX_ROWS = 20
+export var MAX_COLS = 20
 export var MAX_BIOMES = 5
 export var RADIUS = 14
 
@@ -13,11 +13,12 @@ enum Biomes {
 	JUNGLE,
 	MARSH
 }
-var biomeRes = [preload("res://resources/DesertBiome.tres"), 
-	preload("res://resources/GrasslandBiome.tres"),
-	preload("res://resources/PlainsBiome.tres"),
-	preload("res://resources/JungleBiome.tres"),
-	preload("res://resources/MarshBiome.tres")]
+
+var _tile_resources = {
+	"desert": preload("res://scenes/tiles/DesertTile.tscn"),
+	"forest": preload("res://scenes/tiles/ForestTile.tscn"),
+	"ocean": preload("res://scenes/tiles/OceanTile.tscn")
+}
 
 var GridResource = preload("res://scenes/GridSpace.tscn")
 
@@ -48,7 +49,7 @@ func generate_grid():
 	_grid_spaces = genRect(20,20)
 #	_grid_spaces = genSpiral(RADIUS)
 	print(OS.get_ticks_msec() - time)
-#	placeBiomeRoots(_grid_spaces, MAX_BIOMES)
+	placeBiomeRoots(_grid_spaces, MAX_BIOMES)
 	print(OS.get_ticks_msec() - time)
 	print(_grid_spaces.size())
 	
@@ -57,7 +58,7 @@ func generate_grid():
 func placeBiomeRoots(map: Array, num: int) -> void: 
 	var biomeRoots = []
 	for i in range(num):
-		var hex = null
+		var hex: GridSpace = null
 		var _neighbors = []
 		hex = getRandomHex();
 		_neighbors = hex.getNeighbors(self);
@@ -65,25 +66,33 @@ func placeBiomeRoots(map: Array, num: int) -> void:
 			randomize()
 			hex = getRandomHex();
 			_neighbors = hex.getNeighbors(self);
-		hex.setBiome(biomeRes[i]);
+		hex.set_tile(_tile_resources.desert.instance())
 		biomeRoots.append(hex)
-
+		
 func getRandomHex():
-	var randR = randi() % (RADIUS * 2) - RADIUS;
-	var arange = RADIUS * 2 - abs(randR)
-	var offset = RADIUS - abs(randR)
-#	print("Range: " + str(arange) + " Offset: " + str(offset))
-	var randS;
-	if randR > 0:
-		randS = randi() % (RADIUS * 2 - abs(randR)) - RADIUS;
-	else:
-#		print(abs(randR) - RADIUS)
-		randS = randi() % (RADIUS * 2 - abs(randR)) - abs(abs(randR) - RADIUS);
-	 #if randR < 0 else
-	var randQ = -(randR + randS);
-#	print([randR, randS, randQ]);
-	var hex = getHex(randR, randS, randQ)
-	return hex
+	var y = randi() % (MAX_ROWS)
+	var x = randi() % (MAX_COLS) * 2
+	if y % 2 != 0:
+		if x == 0:
+			x += 1
+		else:
+			x -= 1
+	print(str(x) + "  "  + str(y))
+	return getHex2D(x,y)
+
+#func getRandomHex():
+#	var randR = randi() % (RADIUS * 2) - RADIUS;
+#	var arange = RADIUS * 2 - abs(randR)
+#	var offset = RADIUS - abs(randR)
+#	var randS;
+#	if randR > 0:
+#		randS = randi() % (RADIUS * 2 - abs(randR)) - RADIUS;
+#	else:
+#		randS = randi() % (RADIUS * 2 - abs(randR)) - abs(abs(randR) - RADIUS);
+#	var randQ = -(randR + randS);
+#	var hex = getHex(randR, randS, randQ)
+#	print(hex)
+#	return hex
 		
 func genSpiral(mapSize: int, maxX = INF, maxY = INF) -> Array:
 	var _tiles = []
@@ -124,9 +133,19 @@ func genRect(width: int, height: int) -> Array:
 					
 func getHex(_r, _s, _q):
 	for t in _grid_spaces:
-		if t.r== _r and t.s ==_s and t.q==_q:
+		if t._r== _r and t._s ==_s and t._q==_q:
+			print("found")
 			return t
 	return null
+
+func getHex2D(x,y):
+	#TODO: change _grid_spaces to use a map instead
+	for t in _grid_spaces:
+		if t._x == x and t._y == y:
+			return t
+	return null
+		
+	
 	
 func getCollisions(arr1, arr2) -> Array:
 	var coll = [];
