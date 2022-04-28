@@ -3,6 +3,8 @@
 [ext_resource path="res://scenes/tiles/Tile.tscn" type="PackedScene" id=1]
 
 [node name="OceanTile" instance=ExtResource( 1 )]
+_name = "Ocean"
+_terrain_type = 1
 
 [node name="Polygon2D" parent="." index="0"]
 color = Color( 0.235294, 0.380392, 0.545098, 1 )

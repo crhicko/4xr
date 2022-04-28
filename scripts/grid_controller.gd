@@ -6,6 +6,17 @@ export var MAX_BIOMES = 5
 export var RADIUS = 14
 
 var _grid_spaces = []
+
+#generic hash map to hold all of the tiles with "x,y" as the valid strings
+var _grid_map = {
+	
+}
+
+var _island_roots = []
+
+var _grid_space_region = {}
+var _regions = {}
+
 enum Biomes {
 	DESERT,
 	GRASSLAND,
@@ -14,46 +25,42 @@ enum Biomes {
 	MARSH
 }
 
-var _tile_resources = {
-	"desert": preload("res://scenes/tiles/DesertTile.tscn"),
-	"forest": preload("res://scenes/tiles/ForestTile.tscn"),
-	"ocean": preload("res://scenes/tiles/OceanTile.tscn")
-}
-
-var GridResource = preload("res://scenes/GridSpace.tscn")
+const GridResource = preload("res://scenes/GridSpace.tscn")
+onready var TerrainLib = preload("res://scripts/terrain/TerrainManager.gd").new()
 
 signal generate_map
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	randomize();
-#	tiles = genSpiral(RADIUS)
-#	placeBiomeRoots(tiles , MAX_BIOMES)
-#	var tile: GridSpace = getHex(-4,4,0)
-#	print(tile.getCoords())
-#	var neighborCoords = tile.getNeighborCoords()
-#	print(neighborCoords)
-#	var neighbors = []
-#	for c in neighborCoords:
-#		var t = getHex(c[0], c[1], c[2])
-#		if t != null:
-#			neighbors.append(t)
-#	for n in neighbors:
-#		print(n.getCoords())
-
-
 
 #want to get this to just generate ourselves a nice rectangular map that we can scroll around and put tiles on
 func generate_grid():
 	var time = OS.get_ticks_msec();
-	_grid_spaces = genRect(20,20)
-#	_grid_spaces = genSpiral(RADIUS)
-	print(OS.get_ticks_msec() - time)
-	placeBiomeRoots(_grid_spaces, MAX_BIOMES)
-	print(OS.get_ticks_msec() - time)
-	print(_grid_spaces.size())
+	_grid_spaces = genRect(MAX_COLS,MAX_ROWS)
+		
+	var temp = {}
+	for i in _grid_map.values():
+		temp[i] = 1
+	_grid_space_region = GridSpaceRegion.new(temp)
+	TerrainLib.set_region_tiles(_grid_space_region._grid_spaces.keys(), TileResources.scenes.base)	
 	
-
+#	set_map_edge_biome()
+	gen_island(MAX_COLS,MAX_ROWS)
+	#set the base tile region to all of the tiles on the map
+	#coast settting
+	var coast_spaces = _grid_space_region.get_grid_spaces_with_rules(funcref(TerrainLib,"is_neighbor_land"))
+#	for c in _grid_space_region._grid_spaces.values():
+#		c.set_tile(TileResources.scenes.coast.instance())
+	TerrainLib.set_region_tiles(coast_spaces, TileResources.scenes.coast)
+	yield(get_tree().create_timer(1), "timeout")
+	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._grid_spaces.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean")))
+#	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.create_ocean_region(_grid_space_region))
+	var deep_ocean = _regions["ocean"].get_grid_spaces_with_rules(funcref(TerrainLib, "is_deep_ocean"))
+	TerrainLib.set_region_tiles(deep_ocean, TileResources.scenes.ocean)
+	#get all islands
+	
+	
 		
 func placeBiomeRoots(map: Array, num: int) -> void: 
 	var biomeRoots = []
@@ -61,13 +68,32 @@ func placeBiomeRoots(map: Array, num: int) -> void:
 		var hex: GridSpace = null
 		var _neighbors = []
 		hex = getRandomHex();
-		_neighbors = hex.getNeighbors(self);
+		_neighbors = hex.getNeighbors();
 		while (biomeRoots.has(hex) or getCollisions(_neighbors,biomeRoots).size() != 0):
 			randomize()
 			hex = getRandomHex();
-			_neighbors = hex.getNeighbors(self);
-		hex.set_tile(_tile_resources.desert.instance())
+			_neighbors = hex.getNeighbors();
+		hex.set_tile(TileResources.scenes.base.instance())
 		biomeRoots.append(hex)
+		
+func set_map_edge_biome() -> void:
+	var t = TileResources.scenes.ocean
+	for i in range(MAX_COLS):
+		var grid_space = getHex2D(i * 2, 0)
+		grid_space._tile = t.instance()
+		var x
+		if MAX_ROWS - 1 % 2 == 0:
+			x = i * 2
+		else:
+			x = i * 2 + 1
+		grid_space = getHex2D(x, MAX_ROWS - 1)
+		grid_space._tile = t.instance()
+	for i in range(MAX_ROWS):
+		var x = 0 if i % 2 == 0 else 1
+		var grid_space_left = getHex2D(x, i)
+		var grid_space_right = getHex2D(x + ((MAX_COLS - 1) * 2), i)
+		grid_space_left._tile = t.instance()
+		grid_space_right._tile = t.instance()
 		
 func getRandomHex():
 	var y = randi() % (MAX_ROWS)
@@ -80,20 +106,6 @@ func getRandomHex():
 	print(str(x) + "  "  + str(y))
 	return getHex2D(x,y)
 
-#func getRandomHex():
-#	var randR = randi() % (RADIUS * 2) - RADIUS;
-#	var arange = RADIUS * 2 - abs(randR)
-#	var offset = RADIUS - abs(randR)
-#	var randS;
-#	if randR > 0:
-#		randS = randi() % (RADIUS * 2 - abs(randR)) - RADIUS;
-#	else:
-#		randS = randi() % (RADIUS * 2 - abs(randR)) - abs(abs(randR) - RADIUS);
-#	var randQ = -(randR + randS);
-#	var hex = getHex(randR, randS, randQ)
-#	print(hex)
-#	return hex
-		
 func genSpiral(mapSize: int, maxX = INF, maxY = INF) -> Array:
 	var _tiles = []
 	var cnt = 0;
@@ -118,33 +130,51 @@ func genRect(width: int, height: int) -> Array:
 	for i in range(width):
 		for j in range(height):
 			var g = GridResource.instance()
+			var x
 			if j % 2 == 0:
-				g.createGridSpace2D(i * 2,j)
+				x = i * 2
+#				g.createGridSpace2D(i * 2,j)
 			else:
-				g.createGridSpace2D(i * 2 + 1,j)
+				x = i * 2 + 1
+#				g.createGridSpace2D(i * 2 + 1,j)
+				
+			g.createGridSpace2D(x,j)
 			_tiles.append(g)
 			self.add_child(g)
 			g.connect("_grid_space_clicked", self, "_on_grid_space_clicked")
 			cnt += 1
+			_grid_map[str(x) + "," + str(j)] = g
 	print(cnt)
 	return _tiles		
 			
 	
 					
-func getHex(_r, _s, _q):
-	for t in _grid_spaces:
-		if t._r== _r and t._s ==_s and t._q==_q:
-			print("found")
-			return t
-	return null
+func getHexCube(r, s, q):
+	var conversion = cube_to_2d(r, s, q)
+	return getHex2D(conversion.x, conversion.y)
+#	return null
+#	for t in _grid_spaces:
+#		if t._r== _r and t._s ==_s and t._q==_q:
+#			print("found")
+#			return t
+#	return null
 
 func getHex2D(x,y):
 	#TODO: change _grid_spaces to use a map instead
-	for t in _grid_spaces:
-		if t._x == x and t._y == y:
-			return t
-	return null
-		
+	if(_grid_map.has(str(x) + "," + str(y))):
+		return _grid_map[str(x) + "," + str(y)]
+	else:
+		return null
+#	for t in _grid_spaces:
+#		if t._x == x and t._y == y:
+#			return t
+#	return null
+
+
+func cube_to_2d(r,s,q):
+	var col = 2 * q + r
+	var row = r
+	return Vector2(col, row)	
 	
 	
 func getCollisions(arr1, arr2) -> Array:
@@ -164,3 +194,54 @@ func _on_grid_space_clicked(gridSpace):
 
 func _on_GenerateButton_button_up():
 	generate_grid()
+	
+func gen_noise(cols, rows):
+	var NoiseLib = OpenSimplexNoise.new()
+	NoiseLib.seed = randi()
+	NoiseLib.octaves = 3
+	NoiseLib.period = 4
+	NoiseLib.persistence = 0.9
+
+	var noise = []
+	for row in range(rows):
+		var r = []
+		for col in range(cols):
+			r.append(NoiseLib.get_noise_2d(row, col))
+#			print(r[col])
+		noise.append(r)
+	return noise
+
+func gen_center_mask(cols, rows):
+	var center_y = rows/2;
+	var center_x = cols/2;
+	var mask = []
+	for row in range(rows):
+		var r = []
+		for col in range(cols):
+			var d_x = (center_x - col) * (center_x - col);
+			var d_y = (center_y - row) * (center_y - row);
+			var dist = sqrt(d_x + d_y);
+			r.append(dist / cols)
+		mask.append(r)
+	return mask
+	
+func gen_island(cols, rows):
+	var noise = gen_noise(cols,rows)
+	var mask = gen_center_mask(cols,rows)
+	var diff = []
+	for i in range(rows):
+		var r = []
+		for j in range(cols):
+			r.append(noise[i][j] - mask[i][j])
+#			print(r[j])
+		diff.append(r)
+		
+	for i in range(rows):
+		for j in range(cols):
+#			print(diff[i][j])
+			var x = j * 2 if i % 2 == 0 else j * 2 + 1
+			var grid_space = getHex2D(x,i)
+			grid_space.set_noise(diff[i][j])
+			if diff[i][j] > -0.35:
+#				if grid_space._tile is TileResources.scenes.base:
+				grid_space._tile = TileResources.scenes.emptyland.instance()

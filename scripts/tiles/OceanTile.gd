@@ -1,8 +1,8 @@
-extends Node
-class_name Tile    
+extends Tile
+# Declare member variables here. Examples:
+# var a = 2
+# var b = "text"
 
-export(String) var _name
-export(int) var _terrain_type
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

@@ -6,11 +6,6 @@ extends MenuButton
 # var b = "text"
 var _tile = null
 
-var _tile_resources = {
-	"desert": preload("res://scenes/tiles/DesertTile.tscn"),
-	"forest": preload("res://scenes/tiles/ForestTile.tscn"),
-	"ocean": preload("res://scenes/tiles/OceanTile.tscn")
-}
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	self.get_popup().connect("id_pressed", self, "_on_id_pressed")
@@ -19,11 +14,11 @@ func _on_id_pressed(id):
 	SignalManager.connect("grid_space_clicked", self, "_place_tile")
 	match id:
 		0:
-			_tile = _tile_resources.desert.instance()
+			_tile = TileResources.scenes.desert.instance()
 		1:
-			_tile = _tile_resources.forest.instance()
+			_tile = TileResources.scenes.forest.instance()
 		2:
-			_tile = _tile_resources.ocean.instance()
+			_tile = TileResources.scenes.ocean.instance()
 		
 		
 	

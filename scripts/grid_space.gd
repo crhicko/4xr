@@ -6,8 +6,13 @@ var _s;
 var _q;
 var _x;
 var _y;
+var _noise setget set_noise,get_noise
+func set_noise(n):
+	_noise = n
+func get_noise():
+	return _noise
 
-var _tile: Tile
+var _tile: Tile setget set_tile, get_tile
 
 var biome: Biome
 
@@ -17,7 +22,7 @@ var height = 80;
 signal _grid_space_clicked(gridSpace)
 
 func createGridSpaceCube(r: float, q: float, s: float):
-	setCubeCoordinates(r, q, s)
+	setCubeCoords(r, q, s)
 	var c = coordsCubeTo2D(r, q, s)
 	set2DCoords(c.x, c.y)
 	position.x = sqrt(3.0) * 40 * ((r/2) + q)
@@ -27,10 +32,6 @@ func createGridSpaceCube(r: float, q: float, s: float):
 	$s_coord.text = 's: ' + str(s);
 	print(_x)
 	
-func setCubeCoordinates(r, q, s):
-	_r = r;
-	_q = q;
-	_s = s;
 	
 #doubled width
 #0,0 2,0
@@ -52,8 +53,8 @@ func setCubeCoords(r,q,s):
 	_s = s
 	
 func coords2DToCube(x,y):
-	var q = x
-	var r = (y - x) / 2
+	var q = (x-y) / 2
+	var r = y
 	var s = -q-r
 	return {'q': q, 'r': r, 's': s}
 	
@@ -62,30 +63,39 @@ func coordsCubeTo2D(r,q,s):
 	var y = (2 * r) + x
 	return {'x': x, 'y': y}
 	
+#func cube_to_2d(r,s,q):
+#	var x = 2 * q + r
+#	var y = r
+#	return Vector2(col, row)	
 	
-func getNeighborCoords():
+	
+func getNeighbors():
 	var neighbors = [];
-	for r in range(-1, 2):
-		for s in range(-1, 2):
-			for q in range(-1, 2):
-				if (r + s + q) == 0 and (r != r or s != s or q != q):
-					neighbors.append([r + r, s + s, q + q])
-	return neighbors;
-
-func getNeighbors(gc):
-	var neighbors = []
-	for c in getNeighborCoords():
-		var t = gc.getHex(c[0], c[1], c[2])
-		if t != null:
+	var directions = [
+		{"r": 1, "s": 0, "q": -1},
+		{"r": 1, "s": -1, "q": 0},
+		{"r": 0, "s": 1, "q": -1},
+		{"r": 0, "s": -1, "q": 1},
+		{"r": -1, "s": 1, "q": 0},
+		{"r": -1, "s": 0, "q": 1}
+	]
+	var gc = get_parent();
+	for i in range(directions.size()):
+		var mods = directions[i]
+		var t = gc.getHexCube(_r + mods.r, _s + mods.s, _q + mods.q)
+		if t:
 			neighbors.append(t)
-	return neighbors
+	return neighbors;
 
 func getCoords():
 	return [_r, _s, _q]
 	
-func set_tile(tile):
+func set_tile(tile: Tile):
 	_tile = tile
 	self.add_child(tile)
+
+func get_tile():
+	return _tile
 	
 func setColor():
 	$Polygon2D.color = Color.brown
@@ -99,10 +109,6 @@ func setBiome(_biome: Biome) -> void:
 func _ready():
 	pass # Replace with function body.
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 
 func _on_HitBox_mouse_entered():
 	SignalManager.emit_signal("emit_debug_info", 

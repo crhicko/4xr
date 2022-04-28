@@ -2,9 +2,9 @@
 
 [ext_resource path="res://scenes/tiles/Tile.tscn" type="PackedScene" id=1]
 
-[node name="DesertTile" instance=ExtResource( 1 )]
-_name = "Desert"
-_terrain_type = 0
+[node name="CoastTile" instance=ExtResource( 1 )]
+_name = "Coast"
+_terrain_type = 1
 
 [node name="Polygon2D" parent="." index="0"]
-color = Color( 0.956863, 0.729412, 0.411765, 1 )
+color = Color( 0.243137, 0.894118, 1, 1 )

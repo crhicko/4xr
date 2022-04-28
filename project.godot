@@ -20,31 +20,33 @@ _global_script_classes=[ {
 "path": "res://scripts/grid_space.gd"
 }, {
 "base": "Node",
+"class": "GridSpaceRegion",
+"language": "GDScript",
+"path": "res://scripts/grid_space_region.gd"
+}, {
+"base": "Node",
 "class": "Tile",
 "language": "GDScript",
 "path": "res://scripts/tile.gd"
-}, {
-"base": "Node",
-"class": "TileRegion",
-"language": "GDScript",
-"path": "res://scripts/tile_region.gd"
 } ]
 _global_script_class_icons={
 "Biome": "",
 "GridSpace": "",
-"Tile": "",
-"TileRegion": ""
+"GridSpaceRegion": "",
+"Tile": ""
 }
 
 [application]
 
 config/name="4xr"
 run/main_scene="res://scenes/game.tscn"
+boot_splash/bg_color=Color( 0.54902, 0.662745, 0.635294, 1 )
 config/icon="res://icon.png"
 
 [autoload]
 
 SignalManager="*res://scripts/singletons/SignalManager.gd"
+TileResources="*res://scripts/singletons/TileResources.gd"
 
 [display]
 
@@ -56,6 +58,7 @@ window/size/test_height=1080
 [global]
 
 camera=false
+backgr=false
 
 [input]
 
