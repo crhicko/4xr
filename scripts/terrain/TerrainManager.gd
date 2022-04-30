@@ -29,30 +29,6 @@ func is_neighbor_land(grid_space: GridSpace):
 		if tile != null and tile._terrain_type == TileResources.types.Land:
 			return true
 	return false
-	
-#gets the base region and creates a region of all saltwater tiles 
-func create_ocean_region(gs_region):
-	var region = {}
-	var visited = {}
-	var queue = []
-	var count = 0
-	queue.append(gs_region._grid_spaces["0,0"])
-	while(!queue.empty()):
-		var size = queue.size()
-		for i in range(size):
-			var gs = queue.pop_front()
-			var neighbors = gs_region._adj_list
-			for j in neighbors:
-				if visited.has(j) or (j.get_tile() != null and j.get_tile()._terrain_type == TileResources.types.Land):
-					visited[j] = 1
-				else:
-					visited[j] = 1
-					queue.append(j)
-			region[str(gs._x) + "," + str(gs._y)] = gs
-			count += 1
-		
-	print("Count:" + str(count))
-	return region
 
 func is_deep_ocean(grid_space: GridSpace):
 	var tile = grid_space.get_tile()

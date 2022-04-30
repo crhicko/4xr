@@ -39,22 +39,27 @@ func generate_grid():
 	var time = OS.get_ticks_msec();
 	_grid_spaces = genRect(MAX_COLS,MAX_ROWS)
 		
+	#Convert the x,y map to a set of tiles as the keys
+	#i wish godot had sets
 	var temp = {}
 	for i in _grid_map.values():
 		temp[i] = 1
 	_grid_space_region = GridSpaceRegion.new(temp)
-	TerrainLib.set_region_tiles(_grid_space_region._grid_spaces.keys(), TileResources.scenes.base)	
-	
-#	set_map_edge_biome()
+	#set base tile for all of the grid spaces
+	TerrainLib.set_region_tiles(_grid_space_region._adj_list.keys(), TileResources.scenes.base)	
+	#generate land masses
 	gen_island(MAX_COLS,MAX_ROWS)
-	#set the base tile region to all of the tiles on the map
+	
+	yield(get_tree().create_timer(1), "timeout")
+	
+	set_map_edge_biome()
 	#coast settting
 	var coast_spaces = _grid_space_region.get_grid_spaces_with_rules(funcref(TerrainLib,"is_neighbor_land"))
-#	for c in _grid_space_region._grid_spaces.values():
-#		c.set_tile(TileResources.scenes.coast.instance())
 	TerrainLib.set_region_tiles(coast_spaces, TileResources.scenes.coast)
+	#pause for gif
 	yield(get_tree().create_timer(1), "timeout")
-	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._grid_spaces.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean")))
+	#
+	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._adj_list.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean")))
 #	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.create_ocean_region(_grid_space_region))
 	var deep_ocean = _regions["ocean"].get_grid_spaces_with_rules(funcref(TerrainLib, "is_deep_ocean"))
 	TerrainLib.set_region_tiles(deep_ocean, TileResources.scenes.ocean)
@@ -152,12 +157,6 @@ func genRect(width: int, height: int) -> Array:
 func getHexCube(r, s, q):
 	var conversion = cube_to_2d(r, s, q)
 	return getHex2D(conversion.x, conversion.y)
-#	return null
-#	for t in _grid_spaces:
-#		if t._r== _r and t._s ==_s and t._q==_q:
-#			print("found")
-#			return t
-#	return null
 
 func getHex2D(x,y):
 	#TODO: change _grid_spaces to use a map instead
