@@ -11,6 +11,12 @@ _terrain_type = 2
 offset = Vector2( 0, -40 )
 polygon = PoolVector2Array( 34.64, 20, 34.64, 60, 0, 80, -34.64, 60, -34.64, 20, 0, 0 )
 
+[node name="Highlight" type="Polygon2D" parent="."]
+visible = false
+color = Color( 0.886275, 0.0196078, 0.0196078, 0.458824 )
+offset = Vector2( 0, -40 )
+polygon = PoolVector2Array( 34.64, 20, 34.64, 60, 0, 80, -34.64, 60, -34.64, 20, 0, 0 )
+
 [node name="HitBox" type="Area2D" parent="."]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="HitBox"]

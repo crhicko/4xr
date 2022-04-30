@@ -56,9 +56,14 @@ func get_grid_spaces_with_rules(rule_func: FuncRef):
 	return gs
 
 func add_grid_space(grid_space: GridSpace):
+	assert(!_adj_list.has(grid_space))
+	_adj_list[grid_space] = []
 	#adjust adjacency list
-	#adjust grid_spaces
-	pass
+	var neighbors = grid_space.getNeighbors()
+	for n in neighbors:
+		if _adj_list.has(n):
+			_adj_list[n].append(grid_space)
+			_adj_list[grid_space].append(n)
 
 func remove_grid_space(grid_space: GridSpace):
 	#remove adjacencies
