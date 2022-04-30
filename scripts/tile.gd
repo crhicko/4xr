@@ -16,6 +16,9 @@ func highlight_on():
 func highlight_off():
 	Highlight.visible = false
 	
+func highlight_toggle():
+	Highlight.visible = !Highlight.visible
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

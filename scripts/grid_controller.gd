@@ -59,9 +59,9 @@ func generate_grid():
 	#pause for gif
 	yield(get_tree().create_timer(1), "timeout")
 	#
-	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._adj_list.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean")))
+	add_region(GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._adj_list.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean"))), "Ocean")
 #	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.create_ocean_region(_grid_space_region))
-	var deep_ocean = _regions["ocean"].get_grid_spaces_with_rules(funcref(TerrainLib, "is_deep_ocean"))
+	var deep_ocean = _regions["Ocean"].get_grid_spaces_with_rules(funcref(TerrainLib, "is_deep_ocean"))
 	TerrainLib.set_region_tiles(deep_ocean, TileResources.scenes.ocean)
 	#get all islands
 	
@@ -80,7 +80,16 @@ func placeBiomeRoots(map: Array, num: int) -> void:
 			_neighbors = hex.getNeighbors();
 		hex.set_tile(TileResources.scenes.base.instance())
 		biomeRoots.append(hex)
-		
+
+func add_region(grid_space_region, name: String):
+	grid_space_region.set_name(name)
+	_regions[name] = grid_space_region
+	SignalManager.emit_signal("region_created",grid_space_region)
+	
+func remove_region(name):
+	_regions.erase(name)
+	SignalManager.emit_signal("region_removed", name)
+	
 func set_map_edge_biome() -> void:
 	var t = TileResources.scenes.ocean
 	for i in range(MAX_COLS):

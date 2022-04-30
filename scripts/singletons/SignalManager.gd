@@ -7,6 +7,9 @@ signal close_debug_info()
 signal place_tile(tile)
 signal grid_space_clicked(gridSpace)
 
+#GridController
+signal region_created(region)
+signal region_removed(name)
 
 # Declare member variables here. Examples:
 # var a = 2

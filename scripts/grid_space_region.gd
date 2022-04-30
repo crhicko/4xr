@@ -16,7 +16,7 @@ class_name GridSpaceRegion
 #and it will be built from the initial tiles passed into it
 var _adj_list = {}
 var _root
-var _name
+var _name setget set_name, get_name
 
 #set this up so that we can init with just a gs or a whole dict of gs'
 func _init(grid_spaces):
@@ -85,10 +85,8 @@ func set_root(root: GridSpace = null):
 		_root = _adj_list.keys()[0]
 	else:
 		_root = root
-	
-#func highlight_all_tiles():
-#	for gs in get_all_grid_spaces():
-#		gs.highlight()
+		
+
 
 #not tested
 func breadth_traverse(root: GridSpace = _root) -> Array:
@@ -117,6 +115,11 @@ func get_size():
 func destroy():
 	#TODO: handle signal stuff
 	self.queue_free()
+	
+func set_name(n):
+	_name = n
+func get_name():
+	return(_name)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
