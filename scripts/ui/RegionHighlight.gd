@@ -15,6 +15,7 @@ func _ready():
 	
 func _on_index_pressed(index):
 	var t = Popup.get_item_text(index)
+	Popup.set_item_checked(index, !Popup.is_item_checked(index))
 	for gs in _options[t].get_all_grid_spaces():
 		gs.get_tile().highlight_toggle()
 			

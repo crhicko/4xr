@@ -1,10 +1,12 @@
 extends Node
 class_name Tile    
 
-export(String) var _name
+export(String) var _name 
 export(int) var _terrain_type
 
-onready var Highlight = $Highlight
+onready var Highlight = $Highlight\
+
+func get_name(): return _name
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

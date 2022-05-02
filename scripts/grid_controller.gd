@@ -37,14 +37,15 @@ func _ready():
 #want to get this to just generate ourselves a nice rectangular map that we can scroll around and put tiles on
 func generate_grid():
 	var time = OS.get_ticks_msec();
+	#generate the base set of GS we will gen on
 	_grid_spaces = genRect(MAX_COLS,MAX_ROWS)
-		
 	#Convert the x,y map to a set of tiles as the keys
 	#i wish godot had sets
 	var temp = {}
 	for i in _grid_map.values():
 		temp[i] = 1
 	_grid_space_region = GridSpaceRegion.new(temp)
+	add_region(_grid_space_region, "World")
 	#set base tile for all of the grid spaces
 	TerrainLib.set_region_tiles(_grid_space_region._adj_list.keys(), TileResources.scenes.base)	
 	#generate land masses
@@ -58,14 +59,34 @@ func generate_grid():
 	TerrainLib.set_region_tiles(coast_spaces, TileResources.scenes.coast)
 	#pause for gif
 	yield(get_tree().create_timer(1), "timeout")
+	
+	var island_count = 0 
+	for island_region in TerrainLib.create_island_regions(_grid_space_region):
+		island_count += 1
+		add_region(island_region, island_region.get_name())
 	#
 	add_region(GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._adj_list.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean"))), "Ocean")
 #	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.create_ocean_region(_grid_space_region))
 	var deep_ocean = _regions["Ocean"].get_grid_spaces_with_rules(funcref(TerrainLib, "is_deep_ocean"))
 	TerrainLib.set_region_tiles(deep_ocean, TileResources.scenes.ocean)
-	#get all islands
 	
+#	var high_points = TerrainLib.get_highest_noise_spaces(4, _grid_space_region)
+#	for p in high_points:
+#		p.set_tile(TileResources.scenes.mountain.instance())
+	var biggest_island = _get_biggest_island()
+	var mountain_regions = TerrainLib.place_mountain_roots(biggest_island)
+	for r in mountain_regions:
+		add_region(r, r.get_name())
 	
+func _get_biggest_island():
+	var island = null
+	var size = 0
+	for r in _regions.values():
+		if r.get_gs_type() == TileResources.gs_types.Island:
+			if r._adj_list.size() > size:
+				size = r._adj_list.size()
+				island = r
+	return island
 		
 func placeBiomeRoots(map: Array, num: int) -> void: 
 	var biomeRoots = []

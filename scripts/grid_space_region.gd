@@ -9,46 +9,49 @@ class_name GridSpaceRegion
 # Regions are defined as a group of tiles that is contiguous
 # A Map must have at least one entry in it
 
-
-#List of tiles to operate on, tiles are objects so these will be by reference (:
-#var _grid_spaces = {}
 #Each tile is aware of its own adjacency, but in order to have efficient traversals we will have a seaprate adj list in this region
 #and it will be built from the initial tiles passed into it
 var _adj_list = {}
 var _root
 var _name setget set_name, get_name
+var _gs_type setget ,get_gs_type
+
+func get_gs_type(): return _gs_type
 
 #set this up so that we can init with just a gs or a whole dict of gs'
-func _init(grid_spaces):
+func _init(grid_spaces, name='Default', gs_type=TileResources.gs_types.Map):
+	_gs_type = gs_type
+	set_name(name)
 	#if its just 1 tile when intiating lets wrap into a dic and then build the list
 	if typeof(grid_spaces) == TYPE_OBJECT:
 		grid_spaces = { grid_spaces:1 }
-		
+	
 	_buildAdjList(grid_spaces)
 	set_root();
 
 func _buildAdjList(grid_spaces: Dictionary):
 	for gs in grid_spaces.keys():
-		if !_adj_list.has(gs):
-			_adj_list[gs] = []
-	for gs in grid_spaces.keys():
-		var neighbors = gs.getNeighbors()
-		for n in neighbors:
-			_adj_list[gs].append(n)
-#			if !_adj_list.has(n):
-#				_adj_list[n] = [gs]
-#			else:
-#				_adj_list[n].append(gs)
+		add_grid_space(gs)
+#	for gs in grid_spaces.keys():
+#		if !_adj_list.has(gs):
+#			_adj_list[gs] = []
+#	for gs in grid_spaces.keys():
+#		var neighbors = gs.getNeighbors()
+#		for n in neighbors:
+#			_adj_list[gs].append(n)
+
 				
 func get_all_grid_spaces():
 	return _adj_list.keys()
 	
 func modify_terrain(rule_func: FuncRef,alter_func: FuncRef):
 	pass
+
 #	for t in tiles.values():
 #	pass
+
 	
-func get_grid_spaces_with_rules(rule_func: FuncRef):
+func get_grid_spaces_with_rules(rule_func: FuncRef) -> Array:
 	var gs = []
 	for g in _adj_list.keys():
 		if rule_func.call_func(g):
@@ -85,7 +88,10 @@ func set_root(root: GridSpace = null):
 		_root = _adj_list.keys()[0]
 	else:
 		_root = root
-		
+
+func get_random_grid_space() -> GridSpace:
+	var random_index = randi() % _adj_list.size();
+	return _adj_list.keys()[random_index];
 
 
 #not tested
