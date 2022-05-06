@@ -126,6 +126,10 @@ func set_name(n):
 	_name = n
 func get_name():
 	return(_name)
+	
+func set_all_tiles(tile:PackedScene):
+	for t in _adj_list.keys():
+		t.set_tile(tile.instance())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

@@ -9,16 +9,84 @@ extends Node
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
+	
+#traverses and returns a map containing all contiguous gs with a rule
+func get_region_with_rules(root: GridSpace, parent_region: GridSpaceRegion, rule_func: FuncRef) -> Dictionary:
+	var q = []
+	var region = {}
+	var visited = {}
+	q.append(root)
+	while(!q.empty()):
+		var gs = q.pop_front()
+		if visited.has(gs):
+			continue
+		else:
+			visited[gs] = 1
+		var tile: Tile = gs.get_tile()
+		var neighbors = parent_region._adj_list[gs]
+		if rule_func.call_func(gs):
+			region[gs] = true
+			q.append_array(neighbors)	
+	return region
+	
+#get asubregion within the region, does not require all pieces of the region to satisfy the rule func
+func get_subregion_with_rules(root: GridSpace, parent_region: GridSpaceRegion, rule_func: FuncRef) -> Dictionary:
+	var q = []
+	var region = {}
+	var visited = {}
+	q.append(root)
+	while(!q.empty()):
+		var gs = q.pop_front()
+		if visited.has(gs):
+			continue
+		else:
+			visited[gs] = 1
+		var tile: Tile = gs.get_tile()
+		var neighbors = parent_region._adj_list[gs]
+		if rule_func.call_func(gs):
+			region[gs] = true
+		q.append_array(neighbors)	
+	return region
 
-func set_coast_regions(gs_region):
-	var coast_tile = TileResources.scenes.coast
-	for gs in gs_region:
-		gs.set_tile(coast_tile.instance())
-
-func set_region_tiles(gs_region, tile):
-	for gs in gs_region:
-		gs.set_tile(tile.instance())
+func propagate_biome(gs_region: GridSpaceRegion, tile:Tile, amount:int = 4) -> void:
+	var gs = gs_region._root
+	for i in range(randi() % 5 + 2):
+			var neighbors = gs_region._adj_list[gs]
+			var valid_neighbors = []
+			for neighbor in neighbors:
+				if neighbor.get_tile()._terrain_type == TileResources.types.Empty:
+					valid_neighbors.append(neighbor)
+			if valid_neighbors.size() == 0:
+				continue
+			var rand_neighbor = valid_neighbors[randi() % valid_neighbors.size()]
+			gs = rand_neighbor
+			gs_region.add_grid_space(gs)
+			gs.set_tile(tile.instance())
+			
+func place_biome_roots(gs_region: GridSpaceRegion, amount:int = 16) -> Array:
+	var regions = []
+	for i in range(amount):
+		#pick tile
+		var rand_biome: PackedScene = TileResources.scenes.values()[randi() % TileResources.scenes.size()]
+		var rand_location = gs_region.get_random_grid_space()
+		var inst = rand_biome.instance()
+		while rand_biome.get_state().get_node_name(0) == "EmptyLandTile" || inst._terrain_type != TileResources.types.Land || \
+			!is_neighbor_empty(rand_location) || rand_location.get_tile().get_name() != "EmptyLand":
+			inst.queue_free()
+			rand_biome = TileResources.scenes.values()[randi() % TileResources.scenes.size()]
+			inst = rand_biome.instance()
+			rand_location = gs_region.get_random_grid_space()
+		var tile = rand_biome.instance()
+		rand_location.set_tile(tile)
+		var r = GridSpaceRegion.new(rand_location,tile.get_name() + " " + str(i), TileResources.gs_types.Biome)
+		regions.append(r)
+	return regions
 		
+func is_neighbor_rule(gs:GridSpace, rule_func: FuncRef) -> bool:
+	return rule_func.call_func(gs)
+		 
+	
+#funcrefs	
 func is_neighbor_land(grid_space: GridSpace):
 	var t = grid_space.get_tile()
 	if t != null and t._terrain_type == TileResources.types.Land:
@@ -29,6 +97,25 @@ func is_neighbor_land(grid_space: GridSpace):
 		if tile != null and tile._terrain_type == TileResources.types.Land:
 			return true
 	return false
+
+func is_neighbor_tile(grid_space:GridSpace, tile):
+	var neighbors = grid_space.get_neighbors()
+	var temp_tile = tile.instance()
+	for n in neighbors:
+		var t:Tile = n.get_tile()
+		if t.get_name() == temp_tile.get_name():
+			return true
+	return false
+	
+func is_neighbor_empty(grid_space: GridSpace):
+	var neighbors = grid_space.getNeighbors()
+	for n in neighbors:
+		var t:Tile = n.get_tile()
+		if t.get_name() == "EmptyLand" || t.get_name() == "Coast":
+			continue
+		return false
+	return true
+	
 
 func is_deep_ocean(grid_space: GridSpace):
 	var tile = grid_space.get_tile()
@@ -76,43 +163,6 @@ func is_land(gs: GridSpace):
 	else:
 		return false
 
-#traverses and returns a map containing all contiguous gs with a rule
-func get_region_with_rules(root: GridSpace, parent_region: GridSpaceRegion, rule_func: FuncRef) -> Dictionary:
-	var q = []
-	var region = {}
-	var visited = {}
-	q.append(root)
-	while(!q.empty()):
-		var gs = q.pop_front()
-		if visited.has(gs):
-			continue
-		else:
-			visited[gs] = 1
-		var tile: Tile = gs.get_tile()
-		var neighbors = parent_region._adj_list[gs]
-		if rule_func.call_func(gs):
-			region[gs] = true
-			q.append_array(neighbors)	
-	return region
-	
-#get asubregion within the region, does not require all pieces of the region to satisfy the rule func
-func get_subregion_with_rules(root: GridSpace, parent_region: GridSpaceRegion, rule_func: FuncRef) -> Dictionary:
-	var q = []
-	var region = {}
-	var visited = {}
-	q.append(root)
-	while(!q.empty()):
-		var gs = q.pop_front()
-		if visited.has(gs):
-			continue
-		else:
-			visited[gs] = 1
-		var tile: Tile = gs.get_tile()
-		var neighbors = parent_region._adj_list[gs]
-		if rule_func.call_func(gs):
-			region[gs] = true
-		q.append_array(neighbors)	
-	return region
 
 func get_highest_noise_spaces(amount: int, gs_region: GridSpaceRegion) -> Array:
 	var spaces: Array = gs_region._adj_list.keys()
@@ -141,6 +191,8 @@ func place_mountain_roots(gs_region: GridSpaceRegion, amount:int = 4) -> Array:
 			for neighbor in neighbors:
 				if neighbor.get_tile().get_name() != "Mountain":
 					valid_neighbors.append(neighbor)
+			if valid_neighbors.size() == 0:
+				continue
 			var rand_neighbor = valid_neighbors[randi() % valid_neighbors.size()]
 			gs = rand_neighbor
 			regions[n].add_grid_space(gs)
@@ -167,6 +219,10 @@ func is_landlocked(gs: GridSpace):
 		if t._terrain_type == TileResources.types.Water:
 			return false
 	return true
+	
+func set_tiles_from_array(arr,tile:PackedScene):
+	for t in arr:
+		t.set_tile(tile.instance())
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

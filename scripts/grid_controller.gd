@@ -36,6 +36,7 @@ func _ready():
 
 #want to get this to just generate ourselves a nice rectangular map that we can scroll around and put tiles on
 func generate_grid():
+	
 	var time = OS.get_ticks_msec();
 	#generate the base set of GS we will gen on
 	_grid_spaces = genRect(MAX_COLS,MAX_ROWS)
@@ -47,7 +48,9 @@ func generate_grid():
 	_grid_space_region = GridSpaceRegion.new(temp)
 	add_region(_grid_space_region, "World")
 	#set base tile for all of the grid spaces
-	TerrainLib.set_region_tiles(_grid_space_region._adj_list.keys(), TileResources.scenes.base)	
+
+	_regions["World"].set_all_tiles(TileResources.scenes.base)
+#	TerrainLib.set_region_tiles(_grid_space_region._adj_list.keys(), TileResources.scenes.base)	
 	#generate land masses
 	gen_island(MAX_COLS,MAX_ROWS)
 	
@@ -56,7 +59,7 @@ func generate_grid():
 	set_map_edge_biome()
 	#coast settting
 	var coast_spaces = _grid_space_region.get_grid_spaces_with_rules(funcref(TerrainLib,"is_neighbor_land"))
-	TerrainLib.set_region_tiles(coast_spaces, TileResources.scenes.coast)
+	TerrainLib.set_tiles_from_array(coast_spaces, TileResources.scenes.coast)
 	#pause for gif
 	yield(get_tree().create_timer(1), "timeout")
 	
@@ -68,7 +71,7 @@ func generate_grid():
 	add_region(GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._adj_list.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean"))), "Ocean")
 #	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.create_ocean_region(_grid_space_region))
 	var deep_ocean = _regions["Ocean"].get_grid_spaces_with_rules(funcref(TerrainLib, "is_deep_ocean"))
-	TerrainLib.set_region_tiles(deep_ocean, TileResources.scenes.ocean)
+	TerrainLib.set_tiles_from_array(deep_ocean, TileResources.scenes.ocean)
 	
 #	var high_points = TerrainLib.get_highest_noise_spaces(4, _grid_space_region)
 #	for p in high_points:
@@ -77,6 +80,10 @@ func generate_grid():
 	var mountain_regions = TerrainLib.place_mountain_roots(biggest_island)
 	for r in mountain_regions:
 		add_region(r, r.get_name())
+	#
+	var biome_roots = TerrainLib.place_biome_roots(biggest_island)
+	for b in biome_roots:
+		add_region(b, b.get_name())
 	
 func _get_biggest_island():
 	var island = null
