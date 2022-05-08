@@ -3,6 +3,8 @@
 [ext_resource path="res://scenes/tiles/EmptyLandTile.tscn" type="PackedScene" id=1]
 
 [node name="GrasslandTile" instance=ExtResource( 1 )]
+_allows_hill = true
+_allows_forest = true
 
 [node name="Polygon2D" parent="." index="0"]
 color = Color( 0.0235294, 0.509804, 0.0431373, 1 )

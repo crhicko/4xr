@@ -8,7 +8,12 @@ var scenes = {
 	"base": preload("res://scenes/tiles/Tile.tscn"),
 	"emptyland": preload("res://scenes/tiles/EmptyLandTile.tscn"),
 	"mountain": preload("res://scenes/tiles/MountainTile.tscn"),
-	"grassland": preload("res://scenes/tiles/GrasslandTile.tscn")
+	"grassland": preload("res://scenes/tiles/GrasslandTile.tscn"),
+	"savannah": preload("res://scenes/tiles/SavannahTile.tscn"),
+	"dryrocks": preload("res://scenes/tiles/DryRocksTile.tscn"),
+	"snow": preload("res://scenes/tiles/SnowTile.tscn"),
+	"tundra": preload("res://scenes/tiles/TundraTile.tscn"),
+	"plains": preload("res://scenes/tiles/PlainsTile.tscn")
 }
 
 enum types {
@@ -22,6 +27,11 @@ enum gs_types {
 	Island,
 	Biome,
 	Ocean
+}
+
+enum generation_types {
+	Chunk,
+	Perlin
 }
 
 

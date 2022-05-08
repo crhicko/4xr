@@ -223,6 +223,14 @@ func is_landlocked(gs: GridSpace):
 func set_tiles_from_array(arr,tile:PackedScene):
 	for t in arr:
 		t.set_tile(tile.instance())
+		
+func is_neighbor_ocean(gs):
+	var neighbors = gs.getNeighbors()
+	for n in neighbors:
+		var t = n.get_tile()
+		if t.get_name() == "Ocean":
+			return true
+	return false
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

@@ -2,10 +2,10 @@
 
 [ext_resource path="res://scenes/tiles/Tile.tscn" type="PackedScene" id=1]
 
-[node name="DesertTile" instance=ExtResource( 1 )]
-_name = "Desert"
+[node name="DryRocksTile" instance=ExtResource( 1 )]
+_name = "DryRocks"
 _terrain_type = 0
 _allows_hill = true
 
 [node name="Polygon2D" parent="." index="0"]
-color = Color( 1, 0.835294, 0.6, 1 )
+color = Color( 0.992157, 0.584314, 0.14902, 1 )

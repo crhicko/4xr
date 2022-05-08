@@ -1,7 +1,7 @@
 extends Node
 
-export var MAX_ROWS = 20
-export var MAX_COLS = 20
+export var MAX_ROWS = 26
+export var MAX_COLS = 40
 export var MAX_BIOMES = 5
 export var RADIUS = 14
 
@@ -17,35 +17,40 @@ var _island_roots = []
 var _grid_space_region = {}
 var _regions = {}
 
-enum Biomes {
-	DESERT,
-	GRASSLAND,
-	PLAINS,
-	JUNGLE,
-	MARSH
-}
-
 const GridResource = preload("res://scenes/GridSpace.tscn")
 onready var TerrainLib = preload("res://scripts/terrain/TerrainManager.gd").new()
+onready var mg = preload("res://scripts/terrain/map_generator.gd")
 
 signal generate_map
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	randomize();
+	
+
+func generate_grid():
+	if _regions.size() != 0:
+		for r in _regions.keys():
+			_regions[r].queue_free()
+			remove_region(r)
+	var MapGenerator = mg.new(Vector2(MAX_COLS,MAX_ROWS))
+	self.add_child(MapGenerator)
+	var regs = MapGenerator.generate_map()
+	for r in regs:
+		add_region(r, r.get_name())
+
 
 #want to get this to just generate ourselves a nice rectangular map that we can scroll around and put tiles on
-func generate_grid():
-	
+func generate_grid2():
 	var time = OS.get_ticks_msec();
 	#generate the base set of GS we will gen on
-	_grid_spaces = genRect(MAX_COLS,MAX_ROWS)
+#	_grid_spaces = genRect(MAX_COLS,MAX_ROWS)
 	#Convert the x,y map to a set of tiles as the keys
 	#i wish godot had sets
-	var temp = {}
-	for i in _grid_map.values():
-		temp[i] = 1
-	_grid_space_region = GridSpaceRegion.new(temp)
+#	var temp = {}
+#	for i in _grid_map.values():
+#		temp[i] = 1
+	_grid_space_region = GridSpaceRegion.new(genRect(MAX_COLS,MAX_ROWS), "World")
 	add_region(_grid_space_region, "World")
 	#set base tile for all of the grid spaces
 
@@ -166,8 +171,8 @@ func genSpiral(mapSize: int, maxX = INF, maxY = INF) -> Array:
 ##doubled coords
 # 0,0   2,0
 #    1,1
-func genRect(width: int, height: int) -> Array:
-	var _tiles = []
+func genRect(width: int, height: int) -> Dictionary:
+	var _tiles = {}
 	var cnt = 0
 	for i in range(width):
 		for j in range(height):
@@ -179,13 +184,12 @@ func genRect(width: int, height: int) -> Array:
 			else:
 				x = i * 2 + 1
 #				g.createGridSpace2D(i * 2 + 1,j)
-				
 			g.createGridSpace2D(x,j)
-			_tiles.append(g)
+			_tiles[g] = true
 			self.add_child(g)
 			g.connect("_grid_space_clicked", self, "_on_grid_space_clicked")
-			cnt += 1
 			_grid_map[str(x) + "," + str(j)] = g
+			cnt += 1
 	print(cnt)
 	return _tiles		
 			
@@ -206,6 +210,9 @@ func getHex2D(x,y):
 #			return t
 #	return null
 
+func set_2d_map(gs_region: GridSpaceRegion):
+	for gs in gs_region._adj_list.keys():
+		_grid_map[str(gs._x) + "," + str(gs._y)] = gs
 
 func cube_to_2d(r,s,q):
 	var col = 2 * q + r

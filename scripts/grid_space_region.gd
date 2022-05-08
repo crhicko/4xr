@@ -1,4 +1,4 @@
-extends Node
+extends Reference
 class_name GridSpaceRegion
 
 # Effectively a subset of the map that contains a list of all tiles that inhabit the region
@@ -82,6 +82,10 @@ func remove_grid_space(grid_space: GridSpace):
 	#if empty, delete
 	if _adj_list.size() == 0:
 		destroy()
+		
+func remove_grid_spaces(spaces: Array):
+	for n in spaces:
+		remove_grid_space(n)
 	
 func set_root(root: GridSpace = null):
 	if !root:
@@ -119,8 +123,14 @@ func get_size():
 	return _adj_list.size()
 	
 func destroy():
+	pass
 	#TODO: handle signal stuff
-	self.queue_free()
+#	self.queue_free()
+	
+func destroy_and_replace_tiles(tile:PackedScene):
+	for g in get_all_grid_spaces():
+		g.set_tile(tile.instance())
+#	self.queue_free()
 	
 func set_name(n):
 	_name = n
@@ -130,6 +140,10 @@ func get_name():
 func set_all_tiles(tile:PackedScene):
 	for t in _adj_list.keys():
 		t.set_tile(tile.instance())
+		
+func has(gs):
+	return _adj_list.has(gs)
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

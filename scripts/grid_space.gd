@@ -11,8 +11,20 @@ func set_noise(n):
 	_noise = n
 func get_noise():
 	return _noise
+	
+var _humidity setget set_humidity, get_humidity
+func set_humidity(h): _humidity = h; func get_humidity(): return _humidity
+var _temperature setget set_temperature, get_temperature
+func set_temperature(h): _temperature = h; func get_temperature(): return _temperature
+var _elevation setget set_elevation, get_elevation
+func set_elevation(h): _elevation = h; func get_elevation(): return _elevation
+var _vegetation setget set_vegetation, get_vegetation
+func set_vegetation(h): _vegetation = h; func get_vegetation(): return _vegetation
+
 
 var _tile: Tile setget set_tile, get_tile
+
+onready var GridController = $"/root/Game/GridController"
 
 var biome: Biome
 
@@ -82,7 +94,7 @@ func getNeighbors():
 	var gc = get_parent();
 	for i in range(directions.size()):
 		var mods = directions[i]
-		var t = gc.getHexCube(_r + mods.r, _s + mods.s, _q + mods.q)
+		var t = GridController.getHexCube(_r + mods.r, _s + mods.s, _q + mods.q)
 		if t:
 			neighbors.append(t)
 	return neighbors;
@@ -91,6 +103,8 @@ func getCoords():
 	return [_r, _s, _q]
 	
 func set_tile(tile: Tile):
+	if is_instance_valid(_tile):
+		_tile.queue_free()
 	_tile = tile
 	self.add_child(tile)
 

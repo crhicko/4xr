@@ -3,7 +3,7 @@ extends Camera2D
 
 var zoomdist = 0;
 var EDGE_THRESHHOLD = 10;
-var MAX_ZOOM_LEVEL = 3;
+var MAX_ZOOM_LEVEL = 5;
 var _zoom_level = 0;
 
 

@@ -3,8 +3,15 @@ class_name Tile
 
 export(String) var _name 
 export(int) var _terrain_type
+export(bool) var _allows_hill
+export(bool) var _allows_forest
 
-onready var Highlight = $Highlight\
+var _features = {
+	"hill": false,
+	"forest": false
+}
+
+onready var Highlight = $Highlight
 
 func get_name(): return _name
 
@@ -21,6 +28,15 @@ func highlight_off():
 func highlight_toggle():
 	Highlight.visible = !Highlight.visible
 	
+func set_hill(f: bool):
+	if _allows_hill:
+		_features.hill = f
+		$HillIcon.visible = f
+	
+func set_forest(f: bool):
+	if _allows_forest:
+		_features.forest = f
+		$ForestIcon.visible = f
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
