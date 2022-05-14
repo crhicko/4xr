@@ -99,7 +99,7 @@ func is_neighbor_land(grid_space: GridSpace):
 	return false
 
 func is_neighbor_tile(grid_space:GridSpace, tile):
-	var neighbors = grid_space.get_neighbors()
+	var neighbors = grid_space.getNeighbors()
 	var temp_tile = tile.instance()
 	for n in neighbors:
 		var t:Tile = n.get_tile()
@@ -229,6 +229,14 @@ func is_neighbor_ocean(gs):
 	for n in neighbors:
 		var t = n.get_tile()
 		if t.get_name() == "Ocean":
+			return true
+	return false
+	
+func is_neighbor_river(gs):
+	var neighbors = gs.getNeighbors()
+	for n in neighbors:
+		var t = n.get_tile()
+		if t._features.river:
 			return true
 	return false
 	

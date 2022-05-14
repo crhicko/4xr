@@ -34,6 +34,40 @@ enum generation_types {
 	Perlin
 }
 
+enum Directions {
+	NORTH,
+	NORTHEAST,
+	SOUTHEAST,
+	SOUTH,
+	SOUTHWEST,
+	NORTHWEST
+}
+
+enum NDirections {
+	NORTHEAST,
+	EAST,
+	SOUTHEAST,
+	SOUTHWEST,
+	WEST,
+	NORTHWEST
+}
+
+func get_opposite_direction(dir):
+	match dir:
+		TileResources.NDirections.NORTHEAST:
+			return TileResources.NDirections.SOUTHWEST
+		TileResources.NDirections.EAST:
+			return TileResources.NDirections.WEST
+		TileResources.NDirections.SOUTHEAST:
+			return TileResources.NDirections.NORTHWEST
+		TileResources.NDirections.SOUTHWEST:
+			return TileResources.NDirections.NORTHEAST
+		TileResources.NDirections.WEST:
+			return TileResources.NDirections.EAST
+		TileResources.NDirections.NORTHWEST:
+			return TileResources.NDirections.SOUTHEAST
+		
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

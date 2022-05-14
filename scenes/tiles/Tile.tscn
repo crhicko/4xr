@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://scripts/tile.gd" type="Script" id=1]
 [ext_resource path="res://resources/images/forest_icon.png" type="Texture" id=2]
 [ext_resource path="res://resources/images/hill_icon.png" type="Texture" id=3]
+[ext_resource path="res://scenes/ui/YieldDisplay.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scripts/RiverDrawer.gd" type="Script" id=5]
+[ext_resource path="res://scripts/terrain/river_node.gd" type="Script" id=6]
 
 [node name="BaseTile" type="Node2D"]
 script = ExtResource( 1 )
@@ -12,6 +15,12 @@ _terrain_type = 2
 [node name="Polygon2D" type="Polygon2D" parent="."]
 offset = Vector2( 0, -40 )
 polygon = PoolVector2Array( 34.64, 20, 34.64, 60, 0, 80, -34.64, 60, -34.64, 20, 0, 0 )
+
+[node name="Polygon2D2" type="Polygon2D" parent="."]
+visible = false
+color = Color( 0, 0, 0, 1 )
+offset = Vector2( 0, -40 )
+polygon = PoolVector2Array( 30, 23, 30, 57, 0, 75, -30, 57, -30, 23, 0, 0 )
 
 [node name="Highlight" type="Polygon2D" parent="."]
 visible = false
@@ -37,3 +46,53 @@ visible = false
 position = Vector2( 1.19209e-07, 14 )
 scale = Vector2( 0.2, 0.2 )
 texture = ExtResource( 3 )
+
+[node name="Overlay" type="Node2D" parent="."]
+visible = false
+
+[node name="YieldDisplay" parent="Overlay" instance=ExtResource( 4 )]
+
+[node name="River" type="Line2D" parent="."]
+visible = false
+points = PoolVector2Array( -10, 0, 10, 0 )
+width = 20.0
+script = ExtResource( 5 )
+
+[node name="RiverNodes" type="Node2D" parent="."]
+visible = false
+
+[node name="North" type="Node2D" parent="RiverNodes"]
+position = Vector2( 0, -35 )
+script = ExtResource( 6 )
+c_neighbor = NodePath("../Northeast")
+cc_neighbor = NodePath("../Northwest")
+
+[node name="Northeast" type="Node2D" parent="RiverNodes"]
+position = Vector2( 31, -17 )
+script = ExtResource( 6 )
+c_neighbor = NodePath("../Southeast")
+cc_neighbor = NodePath("../North")
+
+[node name="Southeast" type="Node2D" parent="RiverNodes"]
+position = Vector2( 31, 17 )
+script = ExtResource( 6 )
+c_neighbor = NodePath("../South")
+cc_neighbor = NodePath("../Northeast")
+
+[node name="South" type="Node2D" parent="RiverNodes"]
+position = Vector2( 0, 35 )
+script = ExtResource( 6 )
+c_neighbor = NodePath("../Southwest")
+cc_neighbor = NodePath("../Southeast")
+
+[node name="Southwest" type="Node2D" parent="RiverNodes"]
+position = Vector2( -31, 17 )
+script = ExtResource( 6 )
+c_neighbor = NodePath("../Northwest")
+cc_neighbor = NodePath("../South")
+
+[node name="Northwest" type="Node2D" parent="RiverNodes"]
+position = Vector2( -31, -17 )
+script = ExtResource( 6 )
+c_neighbor = NodePath("../North")
+cc_neighbor = NodePath("../Southwest")

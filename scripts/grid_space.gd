@@ -31,6 +31,15 @@ var biome: Biome
 var width = 69.28;
 var height = 80;
 
+var cube_directions = {
+		TileResources.NDirections.SOUTHWEST: {"r": 1, "s": 0, "q": -1},
+		TileResources.NDirections.SOUTHEAST: {"r": 1, "s": -1, "q": 0},
+		TileResources.NDirections.WEST: {"r": 0, "s": 1, "q": -1},
+		TileResources.NDirections.EAST: {"r": 0, "s": -1, "q": 1},
+		TileResources.NDirections.NORTHWEST: {"r": -1, "s": 1, "q": 0},
+		TileResources.NDirections.NORTHEAST: {"r": -1, "s": 0, "q": 1}
+	}
+
 signal _grid_space_clicked(gridSpace)
 
 func createGridSpaceCube(r: float, q: float, s: float):
@@ -83,21 +92,45 @@ func coordsCubeTo2D(r,q,s):
 	
 func getNeighbors():
 	var neighbors = [];
-	var directions = [
-		{"r": 1, "s": 0, "q": -1},
-		{"r": 1, "s": -1, "q": 0},
-		{"r": 0, "s": 1, "q": -1},
-		{"r": 0, "s": -1, "q": 1},
-		{"r": -1, "s": 1, "q": 0},
-		{"r": -1, "s": 0, "q": 1}
-	]
+#	var directions = [
+#		{"r": 1, "s": 0, "q": -1},
+#		{"r": 1, "s": -1, "q": 0},
+#		{"r": 0, "s": 1, "q": -1},
+#		{"r": 0, "s": -1, "q": 1},
+#		{"r": -1, "s": 1, "q": 0},
+#		{"r": -1, "s": 0, "q": 1}
+#	]
 	var gc = get_parent();
-	for i in range(directions.size()):
-		var mods = directions[i]
+	for i in range(cube_directions.size()):
+		var mods = cube_directions[i]
 		var t = GridController.getHexCube(_r + mods.r, _s + mods.s, _q + mods.q)
 		if t:
 			neighbors.append(t)
 	return neighbors;
+	
+func get_neighbor_direction(dir):
+	return GridController.getHexCube(_r + cube_directions.dir.r, _s + cube_directions.dir.s, _q + cube_directions.dir.q)
+#	match dir:
+#		TileResources.NDirections.NORTHEAST:
+#			return GridController.getHexCube(_r + directions[5].r, _s + directions[5].s, _q + directions[5].q)
+#		TileResources.NDirections.EAST:
+#			return GridController.getHexCube(_r + directions[3].r, _s + directions[3].s, _q + directions[3].q)
+#		TileResources.NDirections.SOUTHEAST:
+#			return GridController.getHexCube(_r + directions[1].r, _s + directions[1].s, _q + directions[1].q)
+#		TileResources.NDirections.SOUTHWEST:
+#			return GridController.getHexCube(_r + directions[0].r, _s + directions[0].s, _q + directions[0].q)
+#		TileResources.NDirections.WEST:
+#			return GridController.getHexCube(_r + directions[2].r, _s + directions[2].s, _q + directions[2].q)
+#		TileResources.NDirections.NORTHWEST:
+#			return GridController.getHexCube(_r + directions[4].r, _s + directions[4].s, _q + directions[4].q)
+
+func get_direction_neighbor(gs: GridSpace):
+	var arr = getNeighbors()
+	var index = arr.find(gs)
+	if index == -1:
+		return null
+	else:
+		return index
 
 func getCoords():
 	return [_r, _s, _q]

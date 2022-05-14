@@ -7,6 +7,7 @@ _name = "Tundra"
 _terrain_type = 0
 _allows_hill = true
 _allows_forest = true
+_allows_river = true
 
 [node name="Polygon2D" parent="." index="0"]
 color = Color( 0.52549, 0.486275, 0.392157, 1 )

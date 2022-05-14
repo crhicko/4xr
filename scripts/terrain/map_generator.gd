@@ -46,15 +46,18 @@ func generate_map(num_tiles:int = 40, method = TileResources.generation_types.Ch
 	_island.set_all_tiles(TileResources.scenes.emptyland)
 	regions.append(_island)
 	_shallows.remove_grid_spaces(_island.get_all_grid_spaces())
+	for gs in _shallows.get_all_grid_spaces():
+		gs.set_elevation(-0.1)
 	
-
 	generate_humidity(_island)
 	generate_temperature(_island)
-	generate_elevation(_island)
+	generate_elevation(_island, true)
 	generate_vegetation(_island)
 	populate_tiles(_island)
 	populate_elevation(_island)
 	populate_vegetation(_island)
+	for s in seed_rivers(_island):
+		propagate_river(s)
 	
 #	var _mountains = TerrainLib.place_mountain_roots(_island)
 #	for m in _mountains:
@@ -160,14 +163,17 @@ func generate_humidity(gs_region: GridSpaceRegion, noise_seed = randi()):
 	for g in gs_region.get_all_grid_spaces():
 		g.set_humidity(NoiseLib.get_noise_2d(g._x, g._y))
 		
-func generate_elevation(gs_region: GridSpaceRegion, noise_seed = randi()):
+func generate_elevation(gs_region: GridSpaceRegion, normalize: bool = false, noise_seed = randi() ):
 	var NoiseLib = OpenSimplexNoise.new()
 	NoiseLib.seed = noise_seed
 	NoiseLib.octaves = 3
 	NoiseLib.period = 5
 	NoiseLib.persistence = 0.6
 	for g in gs_region.get_all_grid_spaces():
-		g.set_elevation(NoiseLib.get_noise_2d(g._x, g._y))
+		if !normalize:
+			g.set_elevation(NoiseLib.get_noise_2d(g._x, g._y))
+		else:
+			g.set_elevation((NoiseLib.get_noise_2d(g._x, g._y) + 1) / 2)
 		
 func generate_vegetation(gs_region: GridSpaceRegion, noise_seed = randi()):
 	var NoiseLib = OpenSimplexNoise.new()
@@ -205,9 +211,9 @@ func populate_tiles(gs_region: GridSpaceRegion):
 func populate_elevation(gs_region: GridSpaceRegion):
 	for g in gs_region.get_all_grid_spaces():
 		var e = g.get_elevation()
-		if e > 0.3:
+		if e > 0.7:
 			g.set_tile(TileResources.scenes.mountain.instance())
-		elif e > 0.1:
+		elif e > 0.55:
 			g.get_tile().set_hill(true)
 			
 func populate_vegetation(gs_region: GridSpaceRegion):
@@ -216,6 +222,35 @@ func populate_vegetation(gs_region: GridSpaceRegion):
 		if v > 0:
 			g.get_tile().set_forest(true)
 	
+func seed_rivers(gs_region: GridSpaceRegion, amount: int = 4) -> Array:
+	var river_seeds = []
+	for i in range(amount):
+		var gs = gs_region.get_random_grid_space()
+		while !gs.get_tile()._allows_river || gs.get_elevation() < 0.3 || gs.get_tile()._features.river || \
+			TerrainLib.is_neighbor_tile(gs, TileResources.scenes.coast) || TerrainLib.is_neighbor_river(gs):
+			gs = gs_region.get_random_grid_space()
+		gs.get_tile().set_river(true)
+		river_seeds.append(gs)
+	return river_seeds
+		
+func propagate_river(gs: GridSpace):
+	var river = River.new()
+	var river_tiles = []
+	while gs != null && gs.get_tile().get_name() != "Coast":
+		gs.get_tile().set_river(true)
+		river_tiles.append(gs)
+		var king_e = 1
+		var king_gs = null
+		for n in gs.getNeighbors():
+			if river_tiles.has(n):
+				continue
+			if n.get_elevation() < king_e:
+				king_gs = n
+				king_e = n.get_elevation()
+#		river.add_tile(gs, king_gs)
+		gs = king_gs
+
+		
 	
 #receive an island and smooth it out so it looks more icelandy
 func smooth_gs_region():
