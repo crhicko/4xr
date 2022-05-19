@@ -21,6 +21,19 @@ export(Dictionary) var yields = {
 		
 }
 
+
+onready var connection_paths = {
+	"edges": {},
+	"points": {
+		"N": $ConnectionPoints/Point_N,
+		"NE": $ConnectionPoints/Point_NE,
+		"SE": $ConnectionPoints/Point_SE,
+		"S": $ConnectionPoints/Point_S,
+		"SW": $ConnectionPoints/Point_SW,
+		"NW": $ConnectionPoints/Point_NW,
+	}
+}
+
 onready var Highlight = $Highlight
 
 func get_name(): return _name
@@ -52,6 +65,14 @@ func set_river(f: bool):
 	if _allows_river:
 		_features.river = f
 		$River.visible = f
+		
+func add_to_connection_point(np: Node, p: PackedScene):
+	if !connection_paths.points.values().has(np):
+		printerr("node is not a child of parent")
+	if np.get_child_count() > 0:
+		printerr("connection point already filled")
+		return
+	np.add_child(p.instance())
 		
 func get_river_nodes(dir):
 	var nodes = []

@@ -21,6 +21,14 @@ func set_elevation(h): _elevation = h; func get_elevation(): return _elevation
 var _vegetation setget set_vegetation, get_vegetation
 func set_vegetation(h): _vegetation = h; func get_vegetation(): return _vegetation
 
+var tile_edges = {
+	"ne": null,
+	"nw": null,
+	"e": null,
+	"se": null,
+	"sw": null,
+	"w": null
+}
 
 var _tile: Tile setget set_tile, get_tile
 
@@ -164,7 +172,8 @@ func _on_HitBox_mouse_entered():
 		'r: ' +  str(_r) + '\n' +
 		'q: ' +  str(_q) + '\n' +
 		's: ' +  str(_s) + '\n' +
-		'tile:' + str(_tile)
+		'tile:' + str(_tile) + '\n' + 
+		"global pos:" + str(global_position)
 	)
 
 

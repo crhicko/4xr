@@ -27,6 +27,9 @@ func generate_map(num_tiles:int = 40, method = TileResources.generation_types.Ch
 	regions.append(_world)
 	gridController.set_2d_map(_world)
 	
+	#set the edge nodes for grid spaces
+	gridController.set_edge_nodes()
+	
 #	yield(get_tree().create_timer(1), "timeout")
 	
 	#raise jittered chunk of shallows
@@ -224,17 +227,20 @@ func populate_vegetation(gs_region: GridSpaceRegion):
 	
 func seed_rivers(gs_region: GridSpaceRegion, amount: int = 4) -> Array:
 	var river_seeds = []
+	var headwater_scene = preload("res://scenes/terrain/Headwater.tscn")
 	for i in range(amount):
 		var gs = gs_region.get_random_grid_space()
 		while !gs.get_tile()._allows_river || gs.get_elevation() < 0.3 || gs.get_tile()._features.river || \
 			TerrainLib.is_neighbor_tile(gs, TileResources.scenes.coast) || TerrainLib.is_neighbor_river(gs):
 			gs = gs_region.get_random_grid_space()
-		gs.get_tile().set_river(true)
+		var t = gs.get_tile()
+		t.set_river(true)
+		t.add_to_connection_point(t.connection_paths.points.N,headwater_scene)
 		river_seeds.append(gs)
 	return river_seeds
 		
 func propagate_river(gs: GridSpace):
-	var river = River.new()
+#	var river = River.new()
 	var river_tiles = []
 	while gs != null && gs.get_tile().get_name() != "Coast":
 		gs.get_tile().set_river(true)

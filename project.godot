@@ -29,11 +29,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://scripts/terrain/map_generator.gd"
 }, {
-"base": "Line2D",
-"class": "River",
-"language": "GDScript",
-"path": "res://scripts/terrain/River.gd"
-}, {
 "base": "Node",
 "class": "Tile",
 "language": "GDScript",
@@ -44,7 +39,6 @@ _global_script_class_icons={
 "GridSpace": "",
 "GridSpaceRegion": "",
 "MapGenerator": "",
-"River": "",
 "Tile": ""
 }
 

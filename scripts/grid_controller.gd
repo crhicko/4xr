@@ -38,25 +38,19 @@ func generate_grid():
 	var regs = MapGenerator.generate_map()
 	for r in regs:
 		add_region(r, r.get_name())
+		
 
 
 #want to get this to just generate ourselves a nice rectangular map that we can scroll around and put tiles on
 func generate_grid2():
 	var time = OS.get_ticks_msec();
-	#generate the base set of GS we will gen on
-#	_grid_spaces = genRect(MAX_COLS,MAX_ROWS)
-	#Convert the x,y map to a set of tiles as the keys
-	#i wish godot had sets
-#	var temp = {}
-#	for i in _grid_map.values():
-#		temp[i] = 1
+
 	_grid_space_region = GridSpaceRegion.new(genRect(MAX_COLS,MAX_ROWS), "World")
 	add_region(_grid_space_region, "World")
-	#set base tile for all of the grid spaces
+
 
 	_regions["World"].set_all_tiles(TileResources.scenes.base)
-#	TerrainLib.set_region_tiles(_grid_space_region._adj_list.keys(), TileResources.scenes.base)	
-	#generate land masses
+
 	gen_island(MAX_COLS,MAX_ROWS)
 	
 	yield(get_tree().create_timer(1), "timeout")
@@ -74,13 +68,9 @@ func generate_grid2():
 		add_region(island_region, island_region.get_name())
 	#
 	add_region(GridSpaceRegion.new(TerrainLib.get_region_with_rules(_grid_space_region._adj_list.keys()[0],_grid_space_region, funcref(TerrainLib, "is_ocean"))), "Ocean")
-#	_regions["ocean"] = GridSpaceRegion.new(TerrainLib.create_ocean_region(_grid_space_region))
 	var deep_ocean = _regions["Ocean"].get_grid_spaces_with_rules(funcref(TerrainLib, "is_deep_ocean"))
 	TerrainLib.set_tiles_from_array(deep_ocean, TileResources.scenes.ocean)
 	
-#	var high_points = TerrainLib.get_highest_noise_spaces(4, _grid_space_region)
-#	for p in high_points:
-#		p.set_tile(TileResources.scenes.mountain.instance())
 	var biggest_island = _get_biggest_island()
 	var mountain_regions = TerrainLib.place_mountain_roots(biggest_island)
 	for r in mountain_regions:
@@ -142,6 +132,67 @@ func set_map_edge_biome() -> void:
 		grid_space_left._tile = t.instance()
 		grid_space_right._tile = t.instance()
 		
+func set_edge_nodes() -> void:
+	var edge_node_scene = preload("res://scenes/tiles/edge/TileEdge.tscn")
+	for row in range(MAX_ROWS):
+		for col in range(MAX_COLS):
+			#left, top
+			var gs: GridSpace = get_hex_2d(col * 2 if row % 2 == 0 else col * 2 + 1, row)
+			var neighbor_map = {
+				"nw": get_hex_2d(col - 1, row - 1),
+				"ne": get_hex_2d(col + 1, row - 1),
+				"e": get_hex_2d(col + 2, row),
+				"se": get_hex_2d(col + 1, row + 1),
+				"sw": get_hex_2d(col - 1, row + 1),
+				"w": get_hex_2d(col - 2, row),
+			}
+			var hyp = sqrt((40 * 40) - (20 * 20))
+			var long_vec = hyp*sin(deg2rad(60))
+			var short_vec = hyp * sin(deg2rad(30))
+			for i in range(6):
+				var k = neighbor_map.keys()[i]
+				var n_gs = neighbor_map.values()[i]
+				#already done on preivous pass
+				if gs.tile_edges[k] != null:
+					continue
+				var e = edge_node_scene.instance()
+				self.add_child(e)
+				var opp = ""
+				match k:
+					"nw":
+						e.global_position.x = gs.global_position.x - short_vec
+						e.global_position.y = gs.global_position.y - long_vec
+						opp = "se"
+					"ne":
+						e.global_position.x = gs.global_position.x + short_vec
+						e.global_position.y = gs.global_position.y - long_vec
+						opp = "sw"
+					"e":
+						e.global_position.x = gs.global_position.x + hyp
+						e.global_position.y = gs.global_position.y
+						opp = "w"
+					"se":
+						e.global_position.x = gs.global_position.x + short_vec
+						e.global_position.y = gs.global_position.y + long_vec
+						opp = "nw"
+					"sw":
+						e.global_position.x = gs.global_position.x - short_vec
+						e.global_position.y = gs.global_position.y + long_vec
+						opp = "ne"
+					"w":
+						e.global_position.x = gs.global_position.x - hyp
+						e.global_position.y = gs.global_position.y
+						opp = "e"
+#				e.global_position.x -= 34.64
+#				e.global_position.y -= -20
+				
+				gs.tile_edges[k] = e
+				if n_gs != null:
+					n_gs.tile_edges[opp] = e
+#				print("adding edge")
+				
+					
+
 func getRandomHex():
 	var y = randi() % (MAX_ROWS)
 	var x = randi() % (MAX_COLS) * 2
@@ -200,15 +251,17 @@ func getHexCube(r, s, q):
 	return getHex2D(conversion.x, conversion.y)
 
 func getHex2D(x,y):
-	#TODO: change _grid_spaces to use a map instead
 	if(_grid_map.has(str(x) + "," + str(y))):
 		return _grid_map[str(x) + "," + str(y)]
 	else:
 		return null
-#	for t in _grid_spaces:
-#		if t._x == x and t._y == y:
-#			return t
-#	return null
+		
+func get_hex_2d(x,y):
+	if(_grid_map.has(str(x) + "," + str(y))):
+		return _grid_map[str(x) + "," + str(y)]
+	else:
+		return null
+
 
 func set_2d_map(gs_region: GridSpaceRegion):
 	for gs in gs_region._adj_list.keys():
