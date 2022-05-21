@@ -14,12 +14,6 @@ _terrain_type = 2
 offset = Vector2( 0, -40 )
 polygon = PoolVector2Array( 34.64, 20, 34.64, 60, 0, 80, -34.64, 60, -34.64, 20, 0, 0 )
 
-[node name="Polygon2D2" type="Polygon2D" parent="."]
-visible = false
-color = Color( 0, 0, 0, 1 )
-offset = Vector2( 0, -40 )
-polygon = PoolVector2Array( 30, 23, 30, 57, 0, 75, -30, 57, -30, 23, 0, 0 )
-
 [node name="Highlight" type="Polygon2D" parent="."]
 visible = false
 color = Color( 0.886275, 0.0196078, 0.0196078, 0.458824 )
@@ -54,23 +48,3 @@ visible = false
 visible = false
 color = Color( 0.0666667, 0.121569, 0.913725, 1 )
 polygon = PoolVector2Array( -20, -1, -16, -5, 13, -7, 17, 13, -12, 20 )
-
-[node name="ConnectionPoints" type="Node2D" parent="."]
-
-[node name="Point_N" type="Node2D" parent="ConnectionPoints"]
-position = Vector2( 0, -37 )
-
-[node name="Point_NE" type="Node2D" parent="ConnectionPoints"]
-position = Vector2( 32, -18 )
-
-[node name="Point_SE" type="Node2D" parent="ConnectionPoints"]
-position = Vector2( 32, 18 )
-
-[node name="Point_S" type="Node2D" parent="ConnectionPoints"]
-position = Vector2( 0, 37 )
-
-[node name="Point_SW" type="Node2D" parent="ConnectionPoints"]
-position = Vector2( -32, 18 )
-
-[node name="Point_NW" type="Node2D" parent="ConnectionPoints"]
-position = Vector2( -32, -18 )

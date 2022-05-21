@@ -23,16 +23,19 @@ func set_vegetation(h): _vegetation = h; func get_vegetation(): return _vegetati
 
 var tile_edges = {
 	"ne": null,
-	"nw": null,
 	"e": null,
 	"se": null,
 	"sw": null,
-	"w": null
+	"w": null,
+	"nw": null
 }
 
 var _tile: Tile setget set_tile, get_tile
 
 onready var GridController = $"/root/Game/GridController"
+
+var tile_edge_scene = preload("res://scenes/tiles/edge/TileEdge.tscn")
+var tile_point_scene = preload("res://scenes/tiles/edge/TilePoint.tscn")
 
 var biome: Biome
 
@@ -61,7 +64,156 @@ func createGridSpaceCube(r: float, q: float, s: float):
 	$s_coord.text = 's: ' + str(s);
 	print(_x)
 	
+var points = {
+	TileResources.Directions.NORTH: null,
+	TileResources.Directions.NORTHEAST: null,
+	TileResources.Directions.SOUTHEAST: null,
+	TileResources.Directions.SOUTH: null,
+	TileResources.Directions.SOUTHWEST: null,
+	TileResources.Directions.NORTHWEST: null
+}
+
+var edges = {
+	TileResources.NDirections.NORTHEAST: null,
+	TileResources.NDirections.EAST: null,
+	TileResources.NDirections.SOUTHEAST: null,
+	TileResources.NDirections.SOUTHWEST: null,
+	TileResources.NDirections.WEST: null,
+	TileResources.NDirections.NORTHWEST: null
+}
+
+func add_neighbor_gridspace(dir,gridspace_scene) -> GridSpace:
+#	var gridspace_scene = preload("res://scenes/GridSpace.tscn")
 	
+	#dir to vector
+	var new_x
+	var new_y
+	match dir:
+		TileResources.NDirections.NORTHEAST:
+			new_x = _x + 1
+			new_y = _y - 1
+		TileResources.NDirections.EAST: 
+			new_x = _x + 2
+			new_y = _y
+		TileResources.NDirections.SOUTHEAST: 
+			new_x = _x + 1
+			new_y = _y + 1
+		TileResources.NDirections.SOUTHWEST: 
+			new_x = _x - 1
+			new_y = _y + 1
+		TileResources.NDirections.WEST: 
+			new_x = _x + 2
+			new_y = _y
+		TileResources.NDirections.NORTHWEST:
+			new_x = _x - 1
+			new_y = _y - 1
+	
+	var new_gs: GridSpace = gridspace_scene.instance()
+	GridController.add_child(new_gs)
+	new_gs.createGridSpace2D(new_x,new_y)
+	var neighbors = new_gs.get_neighbors_dir_map()
+	var new_neighbor_dirs = []
+	var new_neighbor_null_dirs = []
+	for n_dir in neighbors.keys():
+		if neighbors[n_dir] != null:
+			new_neighbor_dirs.append(n_dir)
+		else:
+			new_neighbor_null_dirs.append(n_dir)
+	for n_dir in new_neighbor_dirs:
+		var n = neighbors[n_dir]
+		match n_dir:
+			TileResources.NDirections.NORTHEAST:
+				new_gs.edges[n_dir] = n.edges[TileResources.NDirections.SOUTHWEST]
+				new_gs.points[TileResources.Directions.NORTH] = n.points[TileResources.Directions.SOUTHWEST]
+				new_gs.points[TileResources.Directions.NORTHEAST] = n.points[TileResources.Directions.SOUTH]
+			TileResources.NDirections.EAST: 
+				new_gs.edges[n_dir] = n.edges[TileResources.NDirections.WEST]
+				new_gs.points[TileResources.Directions.NORTHEAST] = n.points[TileResources.Directions.NORTHWEST]
+				new_gs.points[TileResources.Directions.SOUTHEAST] = n.points[TileResources.Directions.SOUTHWEST]
+			TileResources.NDirections.SOUTHEAST: 
+				new_gs.edges[n_dir] = n.edges[TileResources.NDirections.NORTHWEST]
+				new_gs.points[TileResources.Directions.SOUTHEAST] = n.points[TileResources.Directions.NORTH]
+				new_gs.points[TileResources.Directions.SOUTH] = n.points[TileResources.Directions.NORTHWEST]
+			TileResources.NDirections.SOUTHWEST: 
+				new_gs.edges[n_dir] = n.edges[TileResources.NDirections.NORTHEAST]
+				new_gs.points[TileResources.Directions.SOUTH] = n.points[TileResources.Directions.NORTHEAST]
+				new_gs.points[TileResources.Directions.SOUTHWEST] = n.points[TileResources.Directions.NORTH]
+			TileResources.NDirections.WEST: 
+				new_gs.edges[n_dir] = n.edges[TileResources.NDirections.EAST]
+				new_gs.points[TileResources.Directions.SOUTHWEST] = n.points[TileResources.Directions.SOUTHEAST]
+				new_gs.points[TileResources.Directions.NORTHWEST] = n.points[TileResources.Directions.NORTHEAST]
+			TileResources.NDirections.NORTHWEST:
+				new_gs.edges[n_dir] = n.edges[TileResources.NDirections.SOUTHEAST]
+				new_gs.points[TileResources.Directions.NORTHWEST] = n.points[TileResources.Directions.SOUTH]
+				new_gs.points[TileResources.Directions.NORTH] = n.points[TileResources.Directions.SOUTHEAST]
+	for n_dir in new_neighbor_null_dirs:
+		_add_points_from_edge_dir(n_dir, new_gs)
+	return new_gs
+	
+func _add_points_from_edge_dir(n_dir, new_gs):
+	new_gs.edges[n_dir] = tile_edge_scene.instance()
+	GridController.add_child(new_gs.edges[n_dir])
+	GridController._edges.append(new_gs.edges[n_dir])
+	var long_vec = 40*sin(deg2rad(60))
+	var short_vec = 40 * sin(deg2rad(30))
+	var length = 40
+	match n_dir:
+		TileResources.NDirections.NORTHEAST:
+			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTH)
+			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHEAST)
+			cw.connect_points(ccw, TileResources.Directions.NORTHWEST)
+		TileResources.NDirections.EAST:
+			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHEAST)
+			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHEAST)
+			cw.connect_points(ccw, TileResources.Directions.NORTH)
+		TileResources.NDirections.SOUTHEAST: 
+			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHEAST)
+			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTH)
+			cw.connect_points(ccw, TileResources.Directions.NORTHEAST)
+		TileResources.NDirections.SOUTHWEST: 
+			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTH)
+			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHWEST)
+			cw.connect_points(ccw, TileResources.Directions.SOUTHEAST)
+		TileResources.NDirections.WEST: 
+			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHWEST)
+			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHWEST)
+			cw.connect_points(ccw, TileResources.Directions.SOUTH)
+		TileResources.NDirections.NORTHWEST:
+			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHWEST)
+			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTH)
+			cw.connect_points(ccw, TileResources.Directions.SOUTHWEST)
+	
+func _configure_point(points, dir):
+	var long_vec = 40*sin(deg2rad(60))
+	var short_vec = 40 * sin(deg2rad(30))
+	var length = 40 
+	var t = points[dir]
+	if t == null:
+		t = tile_point_scene.instance()
+		points[dir] = t
+		GridController.add_child(t)
+		GridController._points.append(t)
+		match dir:
+			TileResources.Directions.NORTH:
+				t.orientation = TileResources.POINTFACING.NORTH
+				t.global_position = Vector2(global_position.x, global_position.y - length)
+			TileResources.Directions.NORTHEAST:
+				t.orientation = TileResources.POINTFACING.SOUTH
+				t.global_position = Vector2(global_position.x + long_vec, global_position.y - short_vec)
+			TileResources.Directions.SOUTHEAST:
+				t.orientation = TileResources.POINTFACING.NORTH
+				t.global_position = Vector2(global_position.x + long_vec, global_position.y + short_vec)
+			TileResources.Directions.SOUTH:
+				t.orientation = TileResources.POINTFACING.SOUTH
+				t.global_position = Vector2(global_position.x, global_position.y + length)
+			TileResources.Directions.SOUTHWEST:
+				t.orientation = TileResources.POINTFACING.NORTH
+				t.global_position = Vector2(global_position.x - long_vec, global_position.y + short_vec)
+			TileResources.Directions.NORTHWEST:
+				t.orientation = TileResources.POINTFACING.SOUTH
+				t.global_position = Vector2(global_position.x - long_vec, global_position.y - short_vec)
+	return t
+
 #doubled width
 #0,0 2,0
 #  1,1
@@ -97,6 +249,11 @@ func coordsCubeTo2D(r,q,s):
 #	var y = r
 #	return Vector2(col, row)	
 	
+func get_shared_edge(neighbor:GridSpace):
+	for e in tile_edges.values():
+		if e != null && neighbor.tile_edges.values().has(e):
+			return e
+	return null
 	
 func getNeighbors():
 	var neighbors = [];
@@ -139,6 +296,17 @@ func get_direction_neighbor(gs: GridSpace):
 		return null
 	else:
 		return index
+
+func get_neighbors_dir_map():
+	var neighbor_map = {
+				TileResources.NDirections.NORTHWEST: GridController.get_hex_2d(_x - 1, _y - 1),
+				TileResources.NDirections.NORTHEAST: GridController.get_hex_2d(_x + 1, _y - 1),
+				TileResources.NDirections.EAST: GridController.get_hex_2d(_x + 2, _y),
+				TileResources.NDirections.SOUTHEAST: GridController.get_hex_2d(_x + 1, _y + 1),
+				TileResources.NDirections.SOUTHWEST: GridController.get_hex_2d(_x - 1, _y + 1),
+				TileResources.NDirections.WEST: GridController.get_hex_2d(_x - 2, _y),
+			}
+	return neighbor_map
 
 func getCoords():
 	return [_r, _s, _q]
@@ -183,8 +351,6 @@ func _on_HitBox_mouse_exited():
 
 func _on_HitBox_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton:
-		print("here2")
 		if event.button_index == BUTTON_LEFT and event.pressed:
-			print("here3")
 			emit_signal("_grid_space_clicked", self)
 

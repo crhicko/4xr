@@ -12,6 +12,9 @@ var _grid_map = {
 	
 }
 
+var _points = []
+var _edges = []
+
 var _island_roots = []
 
 var _grid_space_region = {}
@@ -33,7 +36,7 @@ func generate_grid():
 		for r in _regions.keys():
 			_regions[r].queue_free()
 			remove_region(r)
-	var MapGenerator = mg.new(Vector2(MAX_COLS,MAX_ROWS))
+	var MapGenerator = mg.new(Vector2(3,3))
 	self.add_child(MapGenerator)
 	var regs = MapGenerator.generate_map()
 	for r in regs:
@@ -190,7 +193,26 @@ func set_edge_nodes() -> void:
 				if n_gs != null:
 					n_gs.tile_edges[opp] = e
 #				print("adding edge")
-				
+#
+#func set_point_nodes() -> void:
+#	var point_node_scene = preload("res://scenes/tiles/edge/TilePoint.tscn")
+#	for row in range(MAX_ROWS):
+#		for col in range(MAX_COLS):
+#			#left, top
+#			var gs: GridSpace = get_hex_2d(col * 2 if row % 2 == 0 else col * 2 + 1, row)
+#			var neighbor_map = {
+#				"nw": get_hex_2d(col - 1, row - 1),
+#				"ne": get_hex_2d(col + 1, row - 1),
+#				"e": get_hex_2d(col + 2, row),
+#				"se": get_hex_2d(col + 1, row + 1),
+#				"sw": get_hex_2d(col - 1, row + 1),
+#				"w": get_hex_2d(col - 2, row),
+#			}
+#			var hyp = 40
+#			var long_vec = hyp*sin(deg2rad(60))
+#			var short_vec = hyp * sin(deg2rad(30))
+			#north
+			
 					
 
 func getRandomHex():

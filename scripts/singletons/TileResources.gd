@@ -52,7 +52,7 @@ enum NDirections {
 	NORTHWEST
 }
 
-func get_opposite_direction(dir):
+func get_opposite_ndirection(dir):
 	match dir:
 		TileResources.NDirections.NORTHEAST:
 			return TileResources.NDirections.SOUTHWEST
@@ -66,8 +66,29 @@ func get_opposite_direction(dir):
 			return TileResources.NDirections.EAST
 		TileResources.NDirections.NORTHWEST:
 			return TileResources.NDirections.SOUTHEAST
-		
 
+func get_opposite_direction(dir):
+	match dir:
+		TileResources.Directions.NORTH:
+			return TileResources.Directions.SOUTH
+		TileResources.Directions.NORTHEAST:
+			return TileResources.Directions.SOUTHWEST
+		TileResources.Directions.SOUTHEAST:
+			return TileResources.Directions.NORTHWEST
+		TileResources.Directions.SOUTH:
+			return TileResources.Directions.NORTH
+		TileResources.Directions.SOUTHWEST:
+			return TileResources.Directions.NORTHEAST
+		TileResources.Directions.NORTHWEST:
+			return TileResources.Directions.SOUTHEAST
+			
+
+		
+		
+enum POINTFACING {
+	NORTH,
+	SOUTH
+}
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
