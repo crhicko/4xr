@@ -8,6 +8,12 @@ enum FACING {
 
 var orientation
 
+onready var Hitbox = $Hitbox
+onready var CollisionBox = $Hitbox/CollisionBox
+
+var has_river = false
+var has_crossing = false
+
 var connections = {
 	TileResources.Directions.NORTH: null,
 	TileResources.Directions.SOUTHEAST: null,
@@ -15,6 +21,15 @@ var connections = {
 	TileResources.Directions.SOUTH: null,
 	TileResources.Directions.NORTHWEST: null,
 	TileResources.Directions.NORTHEAST: null
+}
+
+var edge_connections = {
+	TileResources.NDirections.NORTHEAST: null,
+	TileResources.NDirections.EAST: null,
+	TileResources.NDirections.SOUTHEAST: null,
+	TileResources.NDirections.SOUTHWEST: null,
+	TileResources.NDirections.WEST: null,
+	TileResources.NDirections.NORTHWEST: null,
 }
 
 func connect_points(pt, dir_to):

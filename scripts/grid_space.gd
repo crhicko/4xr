@@ -151,37 +151,37 @@ func add_neighbor_gridspace(dir,gridspace_scene) -> GridSpace:
 	return new_gs
 	
 func _add_points_from_edge_dir(n_dir, new_gs):
-	new_gs.edges[n_dir] = tile_edge_scene.instance()
-	GridController.add_child(new_gs.edges[n_dir])
-	GridController._edges.append(new_gs.edges[n_dir])
 	var long_vec = 40*sin(deg2rad(60))
 	var short_vec = 40 * sin(deg2rad(30))
 	var length = 40
+	var ccw
+	var cw
 	match n_dir:
 		TileResources.NDirections.NORTHEAST:
-			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTH)
-			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHEAST)
+			ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTH)
+			cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHEAST)
 			cw.connect_points(ccw, TileResources.Directions.NORTHWEST)
 		TileResources.NDirections.EAST:
-			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHEAST)
-			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHEAST)
+			ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHEAST)
+			cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHEAST)
 			cw.connect_points(ccw, TileResources.Directions.NORTH)
 		TileResources.NDirections.SOUTHEAST: 
-			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHEAST)
-			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTH)
+			ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHEAST)
+			cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTH)
 			cw.connect_points(ccw, TileResources.Directions.NORTHEAST)
 		TileResources.NDirections.SOUTHWEST: 
-			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTH)
-			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHWEST)
+			ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTH)
+			cw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHWEST)
 			cw.connect_points(ccw, TileResources.Directions.SOUTHEAST)
 		TileResources.NDirections.WEST: 
-			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHWEST)
-			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHWEST)
+			ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.SOUTHWEST)
+			cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHWEST)
 			cw.connect_points(ccw, TileResources.Directions.SOUTH)
 		TileResources.NDirections.NORTHWEST:
-			var ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHWEST)
-			var cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTH)
+			ccw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTHWEST)
+			cw = new_gs._configure_point(new_gs.points,TileResources.Directions.NORTH)
 			cw.connect_points(ccw, TileResources.Directions.SOUTHWEST)
+	new_gs._configure_edges(ccw, cw, n_dir)
 	
 func _configure_point(points, dir):
 	var long_vec = 40*sin(deg2rad(60))
@@ -213,6 +213,29 @@ func _configure_point(points, dir):
 				t.orientation = TileResources.POINTFACING.SOUTH
 				t.global_position = Vector2(global_position.x - long_vec, global_position.y - short_vec)
 	return t
+	
+func _configure_edges(ccw, cw, dir):
+	var e = tile_edge_scene.instance()
+	GridController.add_child(e)
+	GridController._edges.append(e)
+	var length = 20 / tan(deg2rad(30))
+	var short_vec = length * sin(deg2rad(30))
+	var long_vec = short_vec / tan(deg2rad(30))
+	match dir:
+		TileResources.NDirections.NORTHEAST:
+			e.global_position = Vector2(global_position.x + short_vec, global_position.y - long_vec)
+		TileResources.NDirections.EAST:
+			e.global_position = Vector2(global_position.x + length, global_position.y)
+		TileResources.NDirections.SOUTHEAST:
+			e.global_position = Vector2(global_position.x + short_vec, global_position.y + long_vec)
+		TileResources.NDirections.SOUTHWEST:
+			e.global_position = Vector2(global_position.x - short_vec, global_position.y + long_vec)
+		TileResources.NDirections.WEST:
+			e.global_position = Vector2(global_position.x - length, global_position.y)
+		TileResources.NDirections.NORTHWEST:
+			e.global_position = Vector2(global_position.x - short_vec, global_position.y - long_vec)
+	edges[dir] = e
+	e.set_face(dir)
 
 #doubled width
 #0,0 2,0

@@ -60,6 +60,18 @@ focus_mode = 2
 text = "Select Region"
 script = ExtResource( 5 )
 
+[node name="PlaceRiverButton" type="Button" parent="UI/CanvasLayer/VBoxContainer"]
+margin_top = 72.0
+margin_right = 102.0
+margin_bottom = 92.0
+text = "Place River"
+
+[node name="ToggleGrid" type="Button" parent="UI/CanvasLayer/VBoxContainer"]
+margin_top = 96.0
+margin_right = 102.0
+margin_bottom = 116.0
+text = "Toggle Grid"
+
 [node name="DebugInfo" type="VBoxContainer" parent="UI/CanvasLayer"]
 anchor_left = 1.0
 anchor_right = 1.0
@@ -77,3 +89,5 @@ visible = false
 texture = SubResource( 2 )
 
 [connection signal="button_up" from="UI/CanvasLayer/VBoxContainer/GenerateButton" to="GridController" method="_on_GenerateButton_button_up"]
+[connection signal="pressed" from="UI/CanvasLayer/VBoxContainer/PlaceRiverButton" to="GridController" method="_on_PlaceRiverButton_pressed"]
+[connection signal="pressed" from="UI/CanvasLayer/VBoxContainer/ToggleGrid" to="GridController" method="_on_ToggleGrid_pressed"]

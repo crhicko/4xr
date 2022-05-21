@@ -363,3 +363,22 @@ func gen_island(cols, rows):
 			if diff[i][j] > -0.35:
 #				if grid_space._tile is TileResources.scenes.base:
 				grid_space._tile = TileResources.scenes.emptyland.instance()
+
+func toggle_points_visible():
+	for p in _points:
+		p.visible = !p.visible
+		
+func toggle_edges_visible():
+	for e in _edges:
+		e.visible = !e.visible
+
+func _on_PlaceRiverButton_pressed():
+	for p in _points:
+		p.CollisionBox.disabled = false
+		
+	pass # Replace with function body.
+
+
+func _on_ToggleGrid_pressed():
+	toggle_points_visible()
+	toggle_edges_visible()
