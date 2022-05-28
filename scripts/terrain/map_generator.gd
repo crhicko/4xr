@@ -29,35 +29,35 @@ func generate_map(num_tiles:int = 40, method = TileResources.generation_types.Ch
 
 	
 	#raise jittered chunk of shallows
-#	var _shallows = GridSpaceRegion.new(generate_jittered_chunk(300), "Shallows")
-#	print(_shallows.get_size())
-#	_shallows.set_all_tiles(TileResources.scenes.coast)
-#	regions.append(_shallows)
+	var _shallows = GridSpaceRegion.new(generate_jittered_chunk(300), "Shallows")
+	print(_shallows.get_size())
+	_shallows.set_all_tiles(TileResources.scenes.coast)
+	regions.append(_shallows)
 	
 	
-#	var _island = GridSpaceRegion.new(generate_jittered_chunk(_shallows.get_size() * 0.9, _shallows, funcref(TerrainLib, "is_neighbor_ocean")), "Main Island")
-#	print(_island.get_size())
-#	var gen_count = 0
-#	while(_island.get_size() < 160 && gen_count < 5):
-#		_island.destroy_and_replace_tiles(TileResources.scenes.coast)
-#		_island = GridSpaceRegion.new(generate_jittered_chunk(_shallows.get_size() * 0.9, _shallows, funcref(TerrainLib, "is_neighbor_ocean")), "Main Island")
-#		print(_island.get_size())
-#		gen_count += 1
-#	_island.set_all_tiles(TileResources.scenes.emptyland)
-#	regions.append(_island)
-#	_shallows.remove_grid_spaces(_island.get_all_grid_spaces())
-#	for gs in _shallows.get_all_grid_spaces():
-#		gs.set_elevation(-0.1)
-#
-#	generate_humidity(_island)
-#	generate_temperature(_island)
-#	generate_elevation(_island, true)
-#	generate_vegetation(_island)
-#	populate_tiles(_island)
-#	populate_elevation(_island)
-#	populate_vegetation(_island)
-#	for s in seed_rivers(_island):
-#		propagate_river(s)
+	var _island = GridSpaceRegion.new(generate_jittered_chunk(_shallows.get_size() * 0.9, _shallows, funcref(TerrainLib, "is_neighbor_ocean")), "Main Island")
+	print(_island.get_size())
+	var gen_count = 0
+	while(_island.get_size() < 160 && gen_count < 5):
+		_island.destroy_and_replace_tiles(TileResources.scenes.coast)
+		_island = GridSpaceRegion.new(generate_jittered_chunk(_shallows.get_size() * 0.9, _shallows, funcref(TerrainLib, "is_neighbor_ocean")), "Main Island")
+		print(_island.get_size())
+		gen_count += 1
+	_island.set_all_tiles(TileResources.scenes.emptyland)
+	regions.append(_island)
+	_shallows.remove_grid_spaces(_island.get_all_grid_spaces())
+	for gs in _shallows.get_all_grid_spaces():
+		gs.set_elevation(-0.1)
+
+	generate_humidity(_island)
+	generate_temperature(_island)
+	generate_elevation(_island, true)
+	generate_vegetation(_island)
+	populate_tiles(_island)
+	populate_elevation(_island)
+	populate_vegetation(_island)
+	for s in seed_rivers(_island):
+		propagate_river(s)
 
 #	var _mountains = TerrainLib.place_mountain_roots(_island)
 #	for m in _mountains:
@@ -127,19 +127,30 @@ func generate_rect(width: int, height: int) -> Dictionary:
 			get_parent().add_child(g)
 			g.connect("_grid_space_clicked", get_parent(), "_on_grid_space_clicked")
 #			_grid_map[str(x) + "," + str(j)] = g
-	print("fuck")
 	return _tiles	
 
 #generate in a circle and 
 func generate_jittered_chunk(size:int, parent_region: GridSpaceRegion = null, rule_func: FuncRef = null, origin: Vector2 = Vector2(_dimensions.x, _dimensions.y / 2)) -> Dictionary:
 	var _tiles = {}
 	var q = []
-	var gs = gridController.getHex2D(int(origin.x) if int(origin.y) % 2 == 0 else origin.x + 1, origin.y)
+	
+	#center stuff
+	print(typeof(origin.x))
+	if int(origin.y) % 2 == 0:
+		if !int(origin.x) % 2 == 0:
+			origin.x += 1
+	else:
+		if int(origin.x) % 2 == 0:
+			origin.x += 1
+			
+	var gs = gridController.getHex2D(origin.x, origin.y)
 	#In the case that the rule func is invalidating at the origin
 	while rule_func && rule_func.call_func(gs):
 		gs = gs.getNeighbors()[randi() % gs.getNeighbors().size()]
+	assert(gs != null)
 	q.append(gs)
 	var cnt = 0
+	print(parent_region)
 	while cnt < size && q.size() > 0:
 		gs = q.pop_front()
 		if _tiles.keys().has(gs) || randf() < 0.5 and cnt > 0:

@@ -36,7 +36,7 @@ func generate_grid():
 		for r in _regions.keys():
 			_regions[r].queue_free()
 			remove_region(r)
-	var MapGenerator = mg.new(Vector2(3,3))
+	var MapGenerator = mg.new(Vector2(35,28))
 	self.add_child(MapGenerator)
 	var regs = MapGenerator.generate_map()
 	for r in regs:
