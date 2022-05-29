@@ -26,6 +26,8 @@ func generate_map(num_tiles:int = 40, method = TileResources.generation_types.Ch
 	_world.set_all_tiles(TileResources.scenes.ocean)
 	regions.append(_world)
 	gridController.set_2d_map(_world)
+	
+	connect_points_to_gs(_world)
 
 	
 	#raise jittered chunk of shallows
@@ -56,9 +58,9 @@ func generate_map(num_tiles:int = 40, method = TileResources.generation_types.Ch
 	populate_tiles(_island)
 	populate_elevation(_island)
 	populate_vegetation(_island)
-	seed_rivers(_island)
-#	for s in seed_rivers(_island):
-#		propagate_river(s)
+	var rivers = seed_rivers(_island,1)
+	for river in rivers:
+		river.propagate()
 
 #	var _mountains = TerrainLib.place_mountain_roots(_island)
 #	for m in _mountains:
@@ -130,6 +132,17 @@ func generate_rect(width: int, height: int) -> Dictionary:
 #			_grid_map[str(x) + "," + str(j)] = g
 	return _tiles	
 
+func connect_points_to_gs(gs_region:GridSpaceRegion):
+	for gs in gs_region.get_all_grid_spaces():
+		for p in gs.points.values():
+			p.gs_neighbors.append(gs)
+	print("SIZE:" + str(get_tree().get_nodes_in_group("tile_points").size()))
+	var pts = get_tree().get_nodes_in_group("tile_points")
+	for p in pts:
+		p.determine_neighbor_directions()
+#	get_tree().call_group("tile_points", "determine_neighbor_directions")
+		
+			
 #generate in a circle and 
 func generate_jittered_chunk(size:int, parent_region: GridSpaceRegion = null, rule_func: FuncRef = null, origin: Vector2 = Vector2(_dimensions.x, _dimensions.y / 2)) -> Dictionary:
 	var _tiles = {}
@@ -265,7 +278,8 @@ func populate_vegetation(gs_region: GridSpaceRegion):
 			g.get_tile().set_forest(true)
 	
 func seed_rivers(gs_region: GridSpaceRegion, amount: int = 4) -> Array:
-	var river_seeds = []
+#	var river_seeds = []
+	var rivers = []
 	var headwater_scene = preload("res://scenes/terrain/Headwater.tscn")
 	for i in range(amount):
 		var gs = gs_region.get_random_grid_space()
@@ -275,10 +289,10 @@ func seed_rivers(gs_region: GridSpaceRegion, amount: int = 4) -> Array:
 		var t = gs.get_tile()
 		t.set_river(true)
 #		t.add_to_connection_point(t.connection_paths.points.N,headwater_scene)
-		river_seeds.append(gs)
-		River.new(t)
+#		river_seeds.append(gs)
+		rivers.append(River.new(t))
 		
-	return river_seeds
+	return rivers
 	
 	
 		

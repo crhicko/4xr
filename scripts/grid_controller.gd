@@ -34,7 +34,7 @@ func _ready():
 func generate_grid():
 	if _regions.size() != 0:
 		for r in _regions.keys():
-			_regions[r].queue_free()
+#			_regions[r].queue_free()
 			remove_region(r)
 	var MapGenerator = mg.new(Vector2(35,28))
 	self.add_child(MapGenerator)

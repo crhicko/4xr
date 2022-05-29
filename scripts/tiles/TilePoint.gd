@@ -1,19 +1,17 @@
 extends Polygon2D
 class_name TilePoint
 
-enum FACING {
-	NORTH,
-	SOUTH
-}
-
 var orientation
 
 onready var Hitbox = $Hitbox
 onready var CollisionBox = $Hitbox/CollisionBox
 
 var has_river = false
+var rivers = []
 var has_crossing = false
 export(bool) var is_occupied = false
+
+var gs_neighbors = []
 
 var connections = {
 	TileResources.Directions.NORTH: null,
@@ -32,6 +30,41 @@ var edge_connections = {
 	TileResources.NDirections.WEST: null,
 	TileResources.NDirections.NORTHWEST: null,
 }
+
+var gs_neighbor_directions
+
+func determine_neighbor_directions():
+	var dirs
+	var temp_n = gs_neighbors
+	if orientation == TileResources.POINTFACING.NORTH:
+		dirs = {
+			TileResources.Directions.NORTHWEST: null,
+			TileResources.Directions.NORTHEAST: null,
+			TileResources.Directions.SOUTH: null
+		}
+		for n in gs_neighbors:
+			if int(n.position.x) == int(self.position.x):
+				dirs[TileResources.Directions.SOUTH] = n
+			elif int(self.position.x) < int(n.position.x):
+				dirs[TileResources.Directions.NORTHWEST] = n
+			elif int(self.position.x) > int(n.position.x):
+				dirs[TileResources.Directions.NORTHEAST] = n
+	else:
+		dirs = {
+			TileResources.Directions.SOUTHWEST: null,
+			TileResources.Directions.SOUTHEAST: null,
+			TileResources.Directions.NORTH: null
+		}
+		for n in gs_neighbors:
+			if int(n.position.x) == int(self.position.x):
+				dirs[TileResources.Directions.NORTH] = n
+			elif int(self.position.x) < int(n.position.x):
+				dirs[TileResources.Directions.SOUTHWEST] = n
+			elif int(self.position.x) > int(n.position.x):
+				dirs[TileResources.Directions.SOUTHEAST] = n
+#	assert(dirs.values()[0] != dirs.values()[1] and dirs.values()[2] != dirs.values()[1] and dirs.values()[0] != dirs.values()[2])
+	gs_neighbor_directions = dirs
+	return
 
 func connect_points(pt, dir_to):
 	connections[dir_to] = pt

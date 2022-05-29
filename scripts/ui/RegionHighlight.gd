@@ -27,7 +27,7 @@ func add_list_option(region):
 func remove_list_option(_name):
 	_options.erase(_name)
 	var index = null
-	for i in range(Popup.item_count):
+	for i in range(Popup.get_item_count()):
 		var t = Popup.get_item_text(i)
 		if t == _name:
 			index = i;

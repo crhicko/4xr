@@ -184,6 +184,7 @@ func _configure_point(points, dir):
 		points[dir] = t
 		GridController.add_child(t)
 		GridController._points.append(t)
+		t.add_to_group("tile_points")
 		match dir:
 			TileResources.Directions.NORTH:
 				t.orientation = TileResources.POINTFACING.NORTH
