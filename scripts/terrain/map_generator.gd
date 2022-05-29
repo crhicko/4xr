@@ -56,8 +56,9 @@ func generate_map(num_tiles:int = 40, method = TileResources.generation_types.Ch
 	populate_tiles(_island)
 	populate_elevation(_island)
 	populate_vegetation(_island)
-	for s in seed_rivers(_island):
-		propagate_river(s)
+	seed_rivers(_island)
+#	for s in seed_rivers(_island):
+#		propagate_river(s)
 
 #	var _mountains = TerrainLib.place_mountain_roots(_island)
 #	for m in _mountains:
@@ -275,24 +276,26 @@ func seed_rivers(gs_region: GridSpaceRegion, amount: int = 4) -> Array:
 		t.set_river(true)
 #		t.add_to_connection_point(t.connection_paths.points.N,headwater_scene)
 		river_seeds.append(gs)
-	return river_seeds
+		River.new(t)
 		
-func propagate_river(gs: GridSpace):
-#	var river = River.new()
-	var river_tiles = []
-	while gs != null && gs.get_tile().get_name() != "Coast":
-		gs.get_tile().set_river(true)
-		river_tiles.append(gs)
-		var king_e = 1
-		var king_gs = null
-		for n in gs.getNeighbors():
-			if river_tiles.has(n):
-				continue
-			if n.get_elevation() < king_e:
-				king_gs = n
-				king_e = n.get_elevation()
-#		river.add_tile(gs, king_gs)
-		gs = king_gs
+	return river_seeds
+	
+	
+		
+#func propagate_river(gs: GridSpace):
+#	var river_tiles = []
+#	while gs != null && gs.get_tile().get_name() != "Coast":
+#		gs.get_tile().set_river(true)
+#		river_tiles.append(gs)
+#		var king_e = 1
+#		var king_gs = null
+#		for n in gs.getNeighbors():
+#			if river_tiles.has(n):
+#				continue
+#			if n.get_elevation() < king_e:
+#				king_gs = n
+#				king_e = n.get_elevation()
+#		gs = king_gs
 
 
 

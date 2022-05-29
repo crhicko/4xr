@@ -10,7 +10,26 @@ export(bool) var _allows_river
 var _features = {
 	"hill": false,
 	"forest": false,
-	"river": false
+	"river": false,
+	"headwater": false
+}
+
+var inset_point_pos = {
+	TileResources.Directions.NORTH: Vector2(0,-30),
+	TileResources.Directions.NORTHEAST: Vector2(26,-10),
+	TileResources.Directions.SOUTHEAST: Vector2(26, 10),
+	TileResources.Directions.SOUTH: Vector2(0, 30),
+	TileResources.Directions.SOUTHWEST: Vector2(-26, 10),
+	TileResources.Directions.NORTHWEST: Vector2(-26, -10),
+}
+
+var inset_points = {
+	TileResources.Directions.NORTH: null,
+	TileResources.Directions.NORTHEAST: null,
+	TileResources.Directions.SOUTHEAST: null,
+	TileResources.Directions.SOUTH: null,
+	TileResources.Directions.SOUTHWEST: null,
+	TileResources.Directions.NORTHWEST: null,
 }
 
 export(Dictionary) var yields = {
@@ -71,6 +90,24 @@ func get_river_nodes(dir):
 		TileResources.NDirections.NORTHWEST:
 			nodes = [get_node("RiverNodes/Northwest"), get_node("RiverNodes/North")]
 	return nodes
+	
+func add_item_to_point(item,dir):
+	inset_points[dir] = item
+	self.add_child(item)
+	item.position += inset_point_pos[dir]
+	
+func remove_item_from_point(dir):
+	var temp = inset_points[dir]
+	inset_points[dir] = null
+	self.remove_child(temp)
+	return temp
+	
+func get_item_at_point(dir):
+	return inset_points[dir]
+	
+func get_item_dir(item):
+	var index = inset_points.values().find(item)
+	return index
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass

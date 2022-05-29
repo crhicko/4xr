@@ -2,4 +2,8 @@
 
 [node name="Headwater" type="Polygon2D"]
 color = Color( 0.733333, 0.180392, 0.960784, 1 )
-polygon = PoolVector2Array( -8, 10, -9, -10, 10, -12, 20, 0, 9, 9 )
+polygon = PoolVector2Array( 0, 4, -4, 0, -4, -4, 0, -6, 3, -3, 3, 3 )
+
+[node name="RiverLine" type="Line2D" parent="."]
+z_index = 2
+points = PoolVector2Array( 0, 0 )

@@ -13,6 +13,7 @@ onready var CollisionBox = $Hitbox/CollisionBox
 
 var has_river = false
 var has_crossing = false
+export(bool) var is_occupied = false
 
 var connections = {
 	TileResources.Directions.NORTH: null,
@@ -35,6 +36,9 @@ var edge_connections = {
 func connect_points(pt, dir_to):
 	connections[dir_to] = pt
 	pt.connections[TileResources.get_opposite_ndirection(dir_to)] = self
+	
+func set_is_occupied(val: bool):
+	is_occupied = val
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

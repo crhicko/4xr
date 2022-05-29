@@ -82,7 +82,15 @@ func get_opposite_direction(dir):
 		TileResources.Directions.NORTHWEST:
 			return TileResources.Directions.SOUTHEAST
 			
-
+func create_direction_dict():
+	return {
+		TileResources.Directions.NORTH: null,
+		TileResources.Directions.NORTHEAST: null,
+		TileResources.Directions.SOUTHEAST: null,
+		TileResources.Directions.SOUTH: null,
+		TileResources.Directions.SOUTHWEST: null,
+		TileResources.Directions.NORTHWEST: null
+	}
 		
 		
 enum POINTFACING {

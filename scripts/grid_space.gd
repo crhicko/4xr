@@ -21,15 +21,6 @@ func set_elevation(h): _elevation = h; func get_elevation(): return _elevation
 var _vegetation setget set_vegetation, get_vegetation
 func set_vegetation(h): _vegetation = h; func get_vegetation(): return _vegetation
 
-var tile_edges = {
-	"ne": null,
-	"e": null,
-	"se": null,
-	"sw": null,
-	"w": null,
-	"nw": null
-}
-
 var _tile: Tile setget set_tile, get_tile
 
 onready var GridController = $"/root/Game/GridController"
@@ -42,6 +33,8 @@ var biome: Biome
 var width = 69.28;
 var height = 80;
 
+signal _grid_space_clicked(gridSpace)
+
 var cube_directions = {
 		TileResources.NDirections.SOUTHWEST: {"r": 1, "s": 0, "q": -1},
 		TileResources.NDirections.SOUTHEAST: {"r": 1, "s": -1, "q": 0},
@@ -51,19 +44,6 @@ var cube_directions = {
 		TileResources.NDirections.NORTHEAST: {"r": -1, "s": 0, "q": 1}
 	}
 
-signal _grid_space_clicked(gridSpace)
-
-func createGridSpaceCube(r: float, q: float, s: float):
-	setCubeCoords(r, q, s)
-	var c = coordsCubeTo2D(r, q, s)
-	set2DCoords(c.x, c.y)
-	position.x = sqrt(3.0) * 40 * ((r/2) + q)
-	position.y = 1.5 * 40 * r
-	$r_coord.text = 'r: ' + str(r);
-	$q_coord.text = 'q: ' + str(q);
-	$s_coord.text = 's: ' + str(s);
-	print(_x)
-	
 var points = {
 	TileResources.Directions.NORTH: null,
 	TileResources.Directions.NORTHEAST: null,
@@ -81,6 +61,17 @@ var edges = {
 	TileResources.NDirections.WEST: null,
 	TileResources.NDirections.NORTHWEST: null
 }
+
+func createGridSpaceCube(r: float, q: float, s: float):
+	setCubeCoords(r, q, s)
+	var c = coordsCubeTo2D(r, q, s)
+	set2DCoords(c.x, c.y)
+	position.x = sqrt(3.0) * 40 * ((r/2) + q)
+	position.y = 1.5 * 40 * r
+	$r_coord.text = 'r: ' + str(r);
+	$q_coord.text = 'q: ' + str(q);
+	$s_coord.text = 's: ' + str(s);
+	print(_x)
 
 func add_neighbor_gridspace(dir,gridspace_scene) -> GridSpace:
 #	var gridspace_scene = preload("res://scenes/GridSpace.tscn")
@@ -273,7 +264,7 @@ func coordsCubeTo2D(r,q,s):
 #	return Vector2(col, row)	
 	
 func get_shared_edge(neighbor:GridSpace):
-	for e in tile_edges.values():
+	for e in edges.values():
 		if e != null && neighbor.tile_edges.values().has(e):
 			return e
 	return null
@@ -298,19 +289,6 @@ func getNeighbors():
 	
 func get_neighbor_direction(dir):
 	return GridController.getHexCube(_r + cube_directions.dir.r, _s + cube_directions.dir.s, _q + cube_directions.dir.q)
-#	match dir:
-#		TileResources.NDirections.NORTHEAST:
-#			return GridController.getHexCube(_r + directions[5].r, _s + directions[5].s, _q + directions[5].q)
-#		TileResources.NDirections.EAST:
-#			return GridController.getHexCube(_r + directions[3].r, _s + directions[3].s, _q + directions[3].q)
-#		TileResources.NDirections.SOUTHEAST:
-#			return GridController.getHexCube(_r + directions[1].r, _s + directions[1].s, _q + directions[1].q)
-#		TileResources.NDirections.SOUTHWEST:
-#			return GridController.getHexCube(_r + directions[0].r, _s + directions[0].s, _q + directions[0].q)
-#		TileResources.NDirections.WEST:
-#			return GridController.getHexCube(_r + directions[2].r, _s + directions[2].s, _q + directions[2].q)
-#		TileResources.NDirections.NORTHWEST:
-#			return GridController.getHexCube(_r + directions[4].r, _s + directions[4].s, _q + directions[4].q)
 
 func get_direction_neighbor(gs: GridSpace):
 	var arr = getNeighbors()
@@ -330,6 +308,12 @@ func get_neighbors_dir_map():
 				TileResources.NDirections.WEST: GridController.get_hex_2d(_x - 2, _y),
 			}
 	return neighbor_map
+	
+func get_edge(dir):
+	return edges[dir]
+	
+func get_point(dir):
+	return points[dir]
 
 func getCoords():
 	return [_r, _s, _q]

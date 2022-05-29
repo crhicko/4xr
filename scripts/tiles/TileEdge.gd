@@ -1,6 +1,6 @@
 extends Node2D
 
-
+export(bool) var is_occupied
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
