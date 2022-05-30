@@ -5,3 +5,9 @@
 [node name="SnowTile" instance=ExtResource( 1 )]
 _name = "Snow"
 _terrain_type = 0
+yields = {
+"food": 0,
+"gold": 0,
+"production": 0,
+"science": 1
+}

@@ -38,6 +38,7 @@ func generate_grid():
 			remove_region(r)
 	var MapGenerator = mg.new(Vector2(35,28))
 	self.add_child(MapGenerator)
+	print("Beginning Generation")
 	var regs = MapGenerator.generate_map()
 	for r in regs:
 		add_region(r, r.get_name())

@@ -16,6 +16,7 @@ func _init(tile: Tile):
 	headwater_tile = tile
 	var hw = headwater_scene.instance()
 	tile.add_item_to_point(hw, determine_headwater_position())
+	tile._features.headwater = true
 	line2d = hw.get_node("RiverLine")
 	set_headwater(hw)
 	

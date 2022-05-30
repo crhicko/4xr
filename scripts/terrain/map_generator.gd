@@ -21,46 +21,71 @@ func _ready():
 # Size: The island must find into a box of this shape
 # Returns: Array of gridspaceregions for the grid controller to fuck with
 func generate_map(num_tiles:int = 40, method = TileResources.generation_types.Chunk, num_islands: int = 1) -> Array:
+	
 	var regions = []
+	print("Generating new ocean rect")
 	_world = GridSpaceRegion.new(gen_rect(_dimensions.x, _dimensions.y), "World")
 	_world.set_all_tiles(TileResources.scenes.ocean)
 	regions.append(_world)
 	gridController.set_2d_map(_world)
-	
+	print("DONE")
+	print("Connecting points and GS")
 	connect_points_to_gs(_world)
+	print("DONE")
 
 	
 	#raise jittered chunk of shallows
+	print("Raising Shallows")
 	var _shallows = GridSpaceRegion.new(generate_jittered_chunk(300), "Shallows")
 	print(_shallows.get_size())
 	_shallows.set_all_tiles(TileResources.scenes.coast)
 	regions.append(_shallows)
+	print("DONE")
 	
-	
+	print("Generating Island")
 	var _island = GridSpaceRegion.new(generate_jittered_chunk(_shallows.get_size() * 0.9, _shallows, funcref(TerrainLib, "is_neighbor_ocean")), "Main Island")
 	print(_island.get_size())
 	var gen_count = 0
 	while(_island.get_size() < 160 && gen_count < 5):
+		print("Attempt " + str(gen_count + 2))
 		_island.destroy_and_replace_tiles(TileResources.scenes.coast)
 		_island = GridSpaceRegion.new(generate_jittered_chunk(_shallows.get_size() * 0.9, _shallows, funcref(TerrainLib, "is_neighbor_ocean")), "Main Island")
 		print(_island.get_size())
 		gen_count += 1
 	_island.set_all_tiles(TileResources.scenes.emptyland)
 	regions.append(_island)
+	print("DONE")
+	
+	print("Adjust shallows region and set elevation")
 	_shallows.remove_grid_spaces(_island.get_all_grid_spaces())
 	for gs in _shallows.get_all_grid_spaces():
 		gs.set_elevation(-0.1)
+	print("DONE")
 
+	print("Generate Humidity")
 	generate_humidity(_island)
+	print("Generate Tempereature")
 	generate_temperature(_island)
+	print("Generate Elevation")
 	generate_elevation(_island, true)
+	print("Generate Vegetation")
 	generate_vegetation(_island)
+	print("DONE")
+	print("Set Biomes")
 	populate_tiles(_island)
+	print("Set Hills")
 	populate_elevation(_island)
+	print("Set Trees")
 	populate_vegetation(_island)
+	print("DONE")
+	
+	print("Seed River")
 	var rivers = seed_rivers(_island,1)
+	print("DONE")
+	print("Propagate River")
 	for river in rivers:
 		river.propagate()
+	print("DONE")
 
 #	var _mountains = TerrainLib.place_mountain_roots(_island)
 #	for m in _mountains:
@@ -283,7 +308,7 @@ func seed_rivers(gs_region: GridSpaceRegion, amount: int = 4) -> Array:
 	var headwater_scene = preload("res://scenes/terrain/Headwater.tscn")
 	for i in range(amount):
 		var gs = gs_region.get_random_grid_space()
-		while !gs.get_tile()._allows_river || gs.get_elevation() < 0.3 || gs.get_tile()._features.river || \
+		while !gs.get_tile()._allows_river || gs.get_elevation() < 0.3 || gs.get_tile()._features.headwater || \
 			TerrainLib.is_neighbor_tile(gs, TileResources.scenes.coast) || TerrainLib.is_neighbor_river(gs):
 			gs = gs_region.get_random_grid_space()
 		var t = gs.get_tile()

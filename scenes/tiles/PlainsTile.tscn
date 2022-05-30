@@ -8,6 +8,12 @@ _terrain_type = 0
 _allows_hill = true
 _allows_forest = true
 _allows_river = true
+yields = {
+"food": 1,
+"gold": 0,
+"production": 1,
+"science": 0
+}
 
 [node name="Polygon2D" parent="." index="0"]
 color = Color( 0.898039, 0.968627, 0.639216, 1 )
